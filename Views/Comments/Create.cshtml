@@ -1,0 +1,50 @@
+﻿@model WebServer.Models.Comment
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+
+<div class="frame">
+    <div class="comment-section">
+        <h1>Add Comment</h1>
+        <hr />
+        <div class="row">
+            <div class="col-md-4">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="name" class="control-label"></label>
+                        <input asp-for="name" class="form-control" />
+                        <span asp-validation-for="name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="feedback" class="control-label"></label>
+                        <textarea rows="4" cols="50" asp-for="feedback" class="form-control"></textarea>
+                        <span asp-validation-for="feedback" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="rating" class="control-label"></label>
+                        <input asp-for="rating" class="form-control" />
+                        <span asp-validation-for="rating" class="text-danger"></span>
+                    </div>
+
+
+
+                </form>
+            </div>
+        </div>
+
+        <div>
+            <input type="submit" value="Create" class="btn btn-primary" />
+            <a asp-action="Index">Back to List</a>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+}

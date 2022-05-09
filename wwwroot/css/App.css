@@ -1,0 +1,35 @@
+﻿:root {
+    --firstColor: #E73C7E;
+    --firstColorFaded: #E73C7ECC;
+    --secondColor: #EE7752;
+    --secondColorFaded: #EE7752CC;
+    --niceWhite: #F9FBFF;
+}
+
+body {
+    background: linear-gradient(to left, var(--secondColor), var(--firstColor));
+}
+
+footer {
+    background-color: var(--niceWhite);
+}
+
+.comment-section {
+    background-color: var(--niceWhite);
+    width: 100%;
+    height: 800px;
+    padding: 50px;
+    border-radius: 5rem;
+    box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(255, 255, 255), 0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+}
+
+.frame {
+    height: calc( 100vh - 61px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+textarea {
+    resize: none;
+}

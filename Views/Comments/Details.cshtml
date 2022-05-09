@@ -1,0 +1,37 @@
+﻿@model WebServer.Models.Comment
+
+@{
+    ViewData["Title"] = "Details";
+}
+<div class="frame">
+    <div class="comment-section">
+        <h1>Comment Details</h1>
+        <div>
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.name)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.name)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.feedback)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.feedback)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.rating)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.rating)
+                </dd>
+            </dl>
+        </div>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+            <a asp-action="Index">Back to List</a>
+        </div>
+    </div>
+</div>
