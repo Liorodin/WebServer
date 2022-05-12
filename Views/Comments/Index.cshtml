@@ -4,48 +4,53 @@
     ViewData["Title"] = "Index";
 }
 
-<div class="frame">
-    <div class="comment-section">
+
         <h1>Comment Section</h1>
         <p>
             <a asp-action="Create">Create New</a>
         </p>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>
-                        @Html.DisplayNameFor(model => model.name)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.feedback)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.rating)
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
+        <div class="comment-table">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.feedback)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.rating)
-                        </td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                        </td>
+                        <th>
+                            @Html.DisplayNameFor(model => model.name)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.feedback)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.rating)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.time)
+                        </th>
+                        <th></th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="comment-name">
+                                @Html.DisplayFor(modelItem => item.name)
+                            </td>
+                            <td class="comment-content">
+                                @Html.DisplayFor(modelItem => item.feedback)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.rating)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.time)
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.id">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.id">Details</a>
+                                <a asp-action="Delete" asp-route-id="@item.id">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>

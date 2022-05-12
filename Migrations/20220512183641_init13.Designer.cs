@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebServer.Data;
 
@@ -11,9 +12,10 @@ using WebServer.Data;
 namespace WebServer.Migrations
 {
     [DbContext(typeof(WebServerContext))]
-    partial class WebServerContextModelSnapshot : ModelSnapshot
+    [Migration("20220512183641_init13")]
+    partial class init13
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,22 +51,9 @@ namespace WebServer.Migrations
                     b.ToTable("Comment");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Contacts", b =>
-                {
-                    b.Property<string>("username")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("username");
-
-                    b.ToTable("Contacts");
-                });
-
             modelBuilder.Entity("WebServer.Models.User", b =>
                 {
                     b.Property<string>("username")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Contactsusername")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("nickname")
@@ -81,21 +70,7 @@ namespace WebServer.Migrations
 
                     b.HasKey("username");
 
-                    b.HasIndex("Contactsusername");
-
                     b.ToTable("User");
-                });
-
-            modelBuilder.Entity("WebServer.Models.User", b =>
-                {
-                    b.HasOne("WebServer.Models.Contacts", null)
-                        .WithMany("userList")
-                        .HasForeignKey("Contactsusername");
-                });
-
-            modelBuilder.Entity("WebServer.Models.Contacts", b =>
-                {
-                    b.Navigation("userList");
                 });
 #pragma warning restore 612, 618
         }

@@ -4,14 +4,17 @@ namespace WebServer.Models
 {
     public class Comment
     {
-        public int Id { get; set; }
+        public int id { get; set; }
 
         [Required]
-        public string name { get; set; }
+        public string? name { get; set; }
 
         [Required]
-        public string feedback { get; set; }
+        public string? feedback { get; set; }
 
+        [RegularExpression("^[1-5]$")]
         public int rating { get; set; }
+
+        public DateTime time { get; set; }
     }
 }

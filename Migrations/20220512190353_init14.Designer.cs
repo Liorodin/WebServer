@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebServer.Data;
 
@@ -11,9 +12,10 @@ using WebServer.Data;
 namespace WebServer.Migrations
 {
     [DbContext(typeof(WebServerContext))]
-    partial class WebServerContextModelSnapshot : ModelSnapshot
+    [Migration("20220512190353_init14")]
+    partial class init14
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,13 +91,13 @@ namespace WebServer.Migrations
             modelBuilder.Entity("WebServer.Models.User", b =>
                 {
                     b.HasOne("WebServer.Models.Contacts", null)
-                        .WithMany("userList")
+                        .WithMany("Users")
                         .HasForeignKey("Contactsusername");
                 });
 
             modelBuilder.Entity("WebServer.Models.Contacts", b =>
                 {
-                    b.Navigation("userList");
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

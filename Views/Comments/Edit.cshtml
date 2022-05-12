@@ -4,8 +4,7 @@
     ViewData["Title"] = "Edit";
 }
 
-<div class="frame">
-    <div class="comment-section">
+
         <h1>Edit Comment</h1>
 
         <hr />
@@ -13,7 +12,7 @@
             <div class="col-md-4">
                 <form asp-action="Edit">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="id" />
                     <div class="form-group">
                         <label asp-for="name" class="control-label"></label>
                         <input asp-for="name" class="form-control" />
@@ -21,7 +20,7 @@
                     </div>
                     <div class="form-group">
                         <label asp-for="feedback" class="control-label"></label>
-                        <input asp-for="feedback" class="form-control" />
+                         <textarea rows="4" cols="50" asp-for="feedback" class="form-control"></textarea>
                         <span asp-validation-for="feedback" class="text-danger"></span>
                     </div>
                     <div class="form-group">
@@ -40,8 +39,7 @@
             <a asp-action="Index">Back to List</a>
         </div>
 
-    </div>
-</div>
+
 
 @section Scripts {
     @{

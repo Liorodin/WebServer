@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,89 +10,87 @@ using WebServer.Models;
 
 namespace WebServer.Controllers
 {
-    public class CommentsController : Controller
+    public class UsersController : Controller
     {
         private readonly WebServerContext _context;
 
-        public CommentsController(WebServerContext context)
+        public UsersController(WebServerContext context)
         {
             _context = context;
         }
 
-        // GET: Comments
+        // GET: Users
         public async Task<IActionResult> Index()
         {
-            List<Comment> comments = await _context.Comment.ToListAsync();
-            comments.Sort((a, b) => -DateTime.Compare(a.time,b.time));
-            return View(comments);
+              return _context.User != null ? 
+                          View(await _context.User.ToListAsync()) :
+                          Problem("Entity set 'WebServerContext.User'  is null.");
         }
 
-        // GET: Comments/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: Users/Details/5
+        public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
+            if (id == null || _context.User == null)
             {
                 return NotFound();
             }
 
-            var comment = await _context.Comment
-                .FirstOrDefaultAsync(m => m.id == id);
-            if (comment == null)
+            var user = await _context.User
+                .FirstOrDefaultAsync(m => m.username == id);
+            if (user == null)
             {
                 return NotFound();
             }
 
-            return View(comment);
+            return View(user);
         }
 
-        // GET: Comments/Create
+        // GET: Users/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Comments/Create
+        // POST: Users/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,name,feedback,rating")] Comment comment)
+        public async Task<IActionResult> Create([Bind("username,nickname,password,picture")] User user)
         {
-            comment.time = DateTime.Now;
             if (ModelState.IsValid)
             {
-
-                _context.Add(comment);
+                _context.Add(user);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(comment);
+            return View(user);
         }
 
-        // GET: Comments/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: Users/Edit/5
+        public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
+            if (id == null || _context.User == null)
             {
                 return NotFound();
             }
 
-            var comment = await _context.Comment.FindAsync(id);
-            if (comment == null)
+            var user = await _context.User.FindAsync(id);
+            if (user == null)
             {
                 return NotFound();
             }
-            return View(comment);
+            return View(user);
         }
 
-        // POST: Comments/Edit/5
+        // POST: Users/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,name,feedback,rating")] Comment comment)
+        public async Task<IActionResult> Edit(string id, [Bind("username,nickname,password,picture")] User user)
         {
-            if (id != comment.id)
+            if (id != user.username)
             {
                 return NotFound();
             }
@@ -102,13 +99,12 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    comment.time = DateTime.Now;
-                    _context.Update(comment);
+                    _context.Update(user);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CommentExists(comment.id))
+                    if (!UserExists(user.username))
                     {
                         return NotFound();
                     }
@@ -119,45 +115,49 @@ namespace WebServer.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(comment);
+            return View(user);
         }
 
-        // GET: Comments/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Users/Delete/5
+        public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
+            if (id == null || _context.User == null)
             {
                 return NotFound();
             }
 
-            var comment = await _context.Comment
-                .FirstOrDefaultAsync(m => m.id == id);
-            if (comment == null)
+            var user = await _context.User
+                .FirstOrDefaultAsync(m => m.username == id);
+            if (user == null)
             {
                 return NotFound();
             }
 
-            return View(comment);
+            return View(user);
         }
 
-        // POST: Comments/Delete/5
+        // POST: Users/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var comment = await _context.Comment.FindAsync(id);
-            if (comment != null)
+            if (_context.User == null)
             {
-                _context.Comment.Remove(comment);
-                await _context.SaveChangesAsync();
-
+                return Problem("Entity set 'WebServerContext.User'  is null.");
             }
+            var user = await _context.User.FindAsync(id);
+            if (user != null)
+            {
+                _context.User.Remove(user);
+            }
+            
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CommentExists(int id)
+        private bool UserExists(string id)
         {
-            return _context.Comment.Any(e => e.id == id);
+          return (_context.User?.Any(e => e.username == id)).GetValueOrDefault();
         }
     }
 }

@@ -15,12 +15,17 @@ footer {
 }
 
 .comment-section {
+    min-width: 800px;
     background-color: var(--niceWhite);
     width: 100%;
     height: 800px;
     padding: 50px;
     border-radius: 5rem;
     box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(255, 255, 255), 0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+}
+
+.table {
+    overflow-y: scroll;
 }
 
 .frame {
@@ -32,4 +37,31 @@ footer {
 
 textarea {
     resize: none;
+}
+
+.comment-content {
+    max-width: 400px;
+    overflow-wrap: break-word;
+}
+
+.comment-name {
+    max-width: 100px;
+    overflow-wrap: break-word;
+}
+
+.comment-section a {
+    text-decoration: none;
+}
+
+.col-md-4 {
+    width: 100%;
+}
+
+    .col-md-4 .rating {
+        width: 100px;
+    }
+
+.comment-table {
+    max-height: 600px;
+    overflow-y: scroll;
 }
