@@ -64,28 +64,37 @@ namespace WebServer.Controllers
             {
                 return RedirectToAction("Create");
             }
-            User? user = await _context.User.FindAsync(Users);
-            if(user == null)
+            User? thisUSer = await _context.User.FindAsync(Username);
+            if (thisUSer == null) return RedirectToAction("Create");
+
+            User? newContact = await _context.User.FindAsync(Users);
+            if (newContact == null) return RedirectToAction("Create");
+
+            Contacts? myContacts = await _context.Contacts.Include(x => x.Users)
+                    .FirstOrDefaultAsync(m => m.Username == Username);
+
+            if (myContacts == null) return RedirectToAction("Create");
+
+            if (!(myContacts.Users.Contains(newContact)))
             {
-                return RedirectToAction("Create");
-            }
-            Contacts? contact = await _context.Contacts.FindAsync(Username);
-            if(contact == null)
-            {
-                contact = new Contacts();
-                contact.Username = Username;
-                contact.Users = new List<User> { user };
-                _context.Contacts.Add(contact);
+                Contacts? thierContacts = await _context.Contacts.Include(x => x.Users)
+                    .FirstOrDefaultAsync(m => m.Username == Users);
+                if (thierContacts == null) return RedirectToAction("Create");
+                myContacts.Users.Add(newContact);
+                thierContacts.Users.Add(thisUSer);
+
+                MessageList messageList = new MessageList();
+                messageList.Users = new List<User> { thisUSer, newContact };
+                messageList.Messages = new List<Message>();
+                _context.MessageList.Add(messageList);
+
+
+                thisUSer.Conversations = new List<MessageList> { messageList };
+                newContact.Conversations = new List<MessageList> { messageList };
+
                 await _context.SaveChangesAsync();
             }
-            else
-            {
-                 contact = await _context.Contacts.Include(x => x.Users)
-                .FirstOrDefaultAsync(m => m.Username == Username);
-                contact.Users.Add(user);
-                await _context.SaveChangesAsync();
-            }
-             return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Contacts/Edit/5
@@ -98,7 +107,7 @@ namespace WebServer.Controllers
 
             var contacts = await _context.Contacts.FindAsync(Id);
             var users = await _context.User.ToListAsync();
-            ViewBag.Users = new SelectList(users,nameof(Models.User.Username), nameof(Models.User.Nickname));
+            ViewBag.Users = new SelectList(users, nameof(Models.User.Username), nameof(Models.User.Nickname));
             if (contacts == null)
             {
                 return NotFound();

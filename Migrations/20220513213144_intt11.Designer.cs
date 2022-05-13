@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebServer.Data;
 
@@ -11,9 +12,10 @@ using WebServer.Data;
 namespace WebServer.Migrations
 {
     [DbContext(typeof(WebServerContext))]
-    partial class WebServerContextModelSnapshot : ModelSnapshot
+    [Migration("20220513213144_intt11")]
+    partial class intt11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,21 +103,23 @@ namespace WebServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("FromUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("MessageListId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Time")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("To")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FromUsername");
 
                     b.HasIndex("MessageListId");
 
@@ -189,11 +193,19 @@ namespace WebServer.Migrations
 
             modelBuilder.Entity("WebServer.Models.Message", b =>
                 {
+                    b.HasOne("WebServer.Models.User", "From")
+                        .WithMany()
+                        .HasForeignKey("FromUsername")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("WebServer.Models.MessageList", "MessageList")
                         .WithMany("Messages")
                         .HasForeignKey("MessageListId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("From");
 
                     b.Navigation("MessageList");
                 });

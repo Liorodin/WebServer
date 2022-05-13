@@ -6,7 +6,7 @@ namespace WebServer.Models
     {
         public int Id { get; set; }
 
-        public User From { get; set; }
+        public string To { get; set; }
 
         public string Type { get; set; }
 
@@ -14,5 +14,9 @@ namespace WebServer.Models
         public string Content { get; set; }
 
         public DateTime Time { get; set; }
+
+        public int MessageListId { get; set; }
+
+        public MessageList MessageList { get; set; }
     }
 }
