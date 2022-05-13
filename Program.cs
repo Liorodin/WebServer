@@ -28,6 +28,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Comments}/{action=index}/{id?}");
+    pattern: "{controller=MessageLists}/{action=index}/{id?}");
 
 app.Run();

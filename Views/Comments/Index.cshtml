@@ -14,16 +14,16 @@
                 <thead>
                     <tr>
                         <th>
-                            @Html.DisplayNameFor(model => model.name)
+                            @Html.DisplayNameFor(model => model.Name)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.feedback)
+                            @Html.DisplayNameFor(model => model.Feedback)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.rating)
+                            @Html.DisplayNameFor(model => model.Rating)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.time)
+                            @Html.DisplayNameFor(model => model.Time)
                         </th>
                         <th></th>
                     </tr>
@@ -33,21 +33,21 @@
                     {
                         <tr>
                             <td class="comment-name">
-                                @Html.DisplayFor(modelItem => item.name)
+                                @Html.DisplayFor(modelItem => item.Name)
                             </td>
                             <td class="comment-content">
-                                @Html.DisplayFor(modelItem => item.feedback)
+                                @Html.DisplayFor(modelItem => item.Feedback)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.rating)
+                                @Html.DisplayFor(modelItem => item.Rating)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.time)
+                                @Html.DisplayFor(modelItem => item.Time)
                             </td>
                             <td>
-                                <a asp-action="Edit" asp-route-id="@item.id">Edit</a>
-                                <a asp-action="Details" asp-route-id="@item.id">Details</a>
-                                <a asp-action="Delete" asp-route-id="@item.id">Delete</a>
+                                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                             </td>
                         </tr>
                     }

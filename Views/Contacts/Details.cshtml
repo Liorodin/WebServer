@@ -10,9 +10,20 @@
     <h4>Contacts</h4>
     <hr />
     <dl class="row">
+        <dt class = "col-sm-2">
+            Contact List:
+       </dt>
+       <dd>
+           <ul>
+                @foreach (var user in Model.Users)
+                {
+                    <li>@user.Nickname</li>
+                }
+            </ul>
+       </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.username">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model?.Username">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

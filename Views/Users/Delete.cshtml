@@ -12,27 +12,27 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.nickname)
+            @Html.DisplayNameFor(model => model.Nickname)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.nickname)
+            @Html.DisplayFor(model => model.Nickname)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.password)
+            @Html.DisplayNameFor(model => model.Password)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.password)
+            @Html.DisplayFor(model => model.Password)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.picture)
+            @Html.DisplayNameFor(model => model.Picture)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.picture)
+            @Html.DisplayFor(model => model.Picture)
         </dd>
     </dl>
     
     <form asp-action="Delete">
-        <input type="hidden" asp-for="username" />
+        <input type="hidden" asp-for="Username" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-action="Index">Back to List</a>
     </form>

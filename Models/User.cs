@@ -1,5 +1,4 @@
 ﻿
-
 using System.ComponentModel.DataAnnotations;
 
 namespace WebServer.Models
@@ -7,12 +6,19 @@ namespace WebServer.Models
     public class User
     {
         [Key]
-        public string username { get; set; }
+        public string Username { get; set; }
 
-        public string nickname { get; set; }
+        [Required]
+        [DataType(DataType.Password)]
+        public string Nickname { get; set; }
 
-        public string password { get; set; }
+        [Required]
+        public string Password { get; set; }
 
-        public string picture { get; set; }
+        public string Picture { get; set; }
+
+        public ICollection<Contacts>? Contacts { get; set; }
+
+        public ICollection<MessageList> Conversations { get; set; }
     }
 }

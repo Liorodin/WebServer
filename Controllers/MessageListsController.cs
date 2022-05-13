@@ -10,87 +10,87 @@ using WebServer.Models;
 
 namespace WebServer.Controllers
 {
-    public class UsersController : Controller
+    public class MessageListsController : Controller
     {
         private readonly WebServerContext _context;
 
-        public UsersController(WebServerContext context)
+        public MessageListsController(WebServerContext context)
         {
             _context = context;
         }
 
-        // GET: Users
+        // GET: MessageLists
         public async Task<IActionResult> Index()
         {
-              return _context.User != null ? 
-                          View(await _context.User.ToListAsync()) :
-                          Problem("Entity set 'WebServerContext.User'  is null.");
+              return _context.MessageList != null ? 
+                          View(await _context.MessageList.ToListAsync()) :
+                          Problem("Entity set 'WebServerContext.MessageList'  is null.");
         }
 
-        // GET: Users/Details/5
-        public async Task<IActionResult> Details(string id)
+        // GET: MessageLists/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.User == null)
+            if (id == null || _context.MessageList == null)
             {
                 return NotFound();
             }
 
-            var user = await _context.User
-                .FirstOrDefaultAsync(m => m.Username == id);
-            if (user == null)
+            var messageList = await _context.MessageList
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (messageList == null)
             {
                 return NotFound();
             }
 
-            return View(user);
+            return View(messageList);
         }
 
-        // GET: Users/Create
+        // GET: MessageLists/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Users/Create
+        // POST: MessageLists/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("username,nickname,password,picture")] User user)
+        public async Task<IActionResult> Create([Bind("Id")] MessageList messageList)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(user);
+                _context.Add(messageList);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
+            return View(messageList);
         }
 
-        // GET: Users/Edit/5
-        public async Task<IActionResult> Edit(string id)
+        // GET: MessageLists/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.User == null)
+            if (id == null || _context.MessageList == null)
             {
                 return NotFound();
             }
 
-            var user = await _context.User.FindAsync(id);
-            if (user == null)
+            var messageList = await _context.MessageList.FindAsync(id);
+            if (messageList == null)
             {
                 return NotFound();
             }
-            return View(user);
+            return View(messageList);
         }
 
-        // POST: Users/Edit/5
+        // POST: MessageLists/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("username,nickname,password,picture")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("Id")] MessageList messageList)
         {
-            if (id != user.Username)
+            if (id != messageList.Id)
             {
                 return NotFound();
             }
@@ -99,12 +99,12 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    _context.Update(user);
+                    _context.Update(messageList);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!UserExists(user.Username))
+                    if (!MessageListExists(messageList.Id))
                     {
                         return NotFound();
                     }
@@ -115,49 +115,49 @@ namespace WebServer.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
+            return View(messageList);
         }
 
-        // GET: Users/Delete/5
-        public async Task<IActionResult> Delete(string id)
+        // GET: MessageLists/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.User == null)
+            if (id == null || _context.MessageList == null)
             {
                 return NotFound();
             }
 
-            var user = await _context.User
-                .FirstOrDefaultAsync(m => m.Username == id);
-            if (user == null)
+            var messageList = await _context.MessageList
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (messageList == null)
             {
                 return NotFound();
             }
 
-            return View(user);
+            return View(messageList);
         }
 
-        // POST: Users/Delete/5
+        // POST: MessageLists/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.User == null)
+            if (_context.MessageList == null)
             {
-                return Problem("Entity set 'WebServerContext.User'  is null.");
+                return Problem("Entity set 'WebServerContext.MessageList'  is null.");
             }
-            var user = await _context.User.FindAsync(id);
-            if (user != null)
+            var messageList = await _context.MessageList.FindAsync(id);
+            if (messageList != null)
             {
-                _context.User.Remove(user);
+                _context.MessageList.Remove(messageList);
             }
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool UserExists(string id)
+        private bool MessageListExists(int id)
         {
-          return (_context.User?.Any(e => e.Username == id)).GetValueOrDefault();
+          return (_context.MessageList?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

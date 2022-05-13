@@ -1,15 +1,18 @@
-﻿namespace WebServer.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WebServer.Models
 {
     public class Message
     {
         public int Id { get; set; }
 
-        public string from { get; set; }
+        public User From { get; set; }
 
-        public string type { get; set; }
+        public string Type { get; set; }
 
-        public string content { get; set; }
+        [Required]
+        public string Content { get; set; }
 
-        public DateTime time { get; set; }
+        public DateTime Time { get; set; }
     }
 }
