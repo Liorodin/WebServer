@@ -15,10 +15,8 @@ namespace WebServer.Models
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        public string Picture { get; set; }
+        public string? Picture { get; set; }
 
-        public ICollection<Contacts>? Contacts { get; set; }
-
-        public ICollection<MessageList>? Conversations { get; set; }
+        public ICollection<Chat>? Chats { get; set; }
     }
 }
