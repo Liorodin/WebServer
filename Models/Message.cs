@@ -6,6 +6,8 @@ namespace WebServer.Models
     {
         public int Id { get; set; }
 
+        public string from { get; set; }
+
         public string To { get; set; }
 
         public string Type { get; set; }
@@ -13,10 +15,10 @@ namespace WebServer.Models
         [Required]
         public string Content { get; set; }
 
-        public DateTime Time { get; set; }
+        public DateTime? Time { get; set; }
 
-        public int MessageListId { get; set; }
+        public int ChatID { get; set; }
 
-        public MessageList MessageList { get; set; }
+        public Chat Chat { get; set; }
     }
 }

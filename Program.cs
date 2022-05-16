@@ -9,6 +9,23 @@ builder.Services.AddDbContext<WebServerContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddSession(option =>
+{
+    option.IdleTimeout = TimeSpan.FromMinutes(15);
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Allow All", builder =>
+    {
+        builder
+          .AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader();
+
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -21,13 +38,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseCors("Allow All");
 app.UseRouting();
-
+app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Messages}/{action=index}/{id?}");
+    pattern: "{controller=Users}/{action=Create}/{id?}");
 
 app.Run();
