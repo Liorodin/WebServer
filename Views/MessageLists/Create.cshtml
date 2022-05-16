@@ -1,4 +1,4 @@
-﻿@model WebServer.Models.Contacts
+﻿@model WebServer.Models.MessageList
 
 @{
     ViewData["Title"] = "Create";
@@ -6,16 +6,17 @@
 
 <h1>Create</h1>
 
-<h4>Contacts</h4>
+<h4>MessageList</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Username" class="control-label"></label>
-                <select asp-for="Username" class="form-control" asp-items="@ViewBag.Users" ></select>
-                <span asp-validation-for="Username" class="text-danger"></span>
+
+             <div class="form-group">
+                <label asp-for="Users" class="control-label"></label>
+                <select asp-for="Users" class="form-control" asp-items="@ViewBag.Users" ></select>
+                <span asp-validation-for="Users" class="text-danger"></span>
             </div>
 
             <div class="form-group">
@@ -24,6 +25,11 @@
                 <span asp-validation-for="Users" class="text-danger"></span>
             </div>
 
+            <div class="form-group">
+                <label asp-for="Messages" class="control-label"></label>
+                <textarea rows="4" cols="50" asp-for="Messages" class="form-control"></textarea>
+                <span asp-validation-for="Messages" class="text-danger"></span>
+            </div>
 
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

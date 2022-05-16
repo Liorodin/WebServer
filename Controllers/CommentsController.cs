@@ -24,20 +24,20 @@ namespace WebServer.Controllers
         public async Task<IActionResult> Index()
         {
             List<Comment> comments = await _context.Comment.ToListAsync();
-            comments.Sort((a, b) => -DateTime.Compare(a.time,b.time));
+            comments.Sort((a, b) => -DateTime.Compare(a.Time,b.Time));
             return View(comments);
         }
 
         // GET: Comments/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? Id)
         {
-            if (id == null)
+            if (Id == null)
             {
                 return NotFound();
             }
 
             var comment = await _context.Comment
-                .FirstOrDefaultAsync(m => m.id == id);
+                .FirstOrDefaultAsync(m => m.Id == Id);
             if (comment == null)
             {
                 return NotFound();
@@ -57,9 +57,9 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,name,feedback,rating")] Comment comment)
+        public async Task<IActionResult> Create([Bind("Id,Name,Feedback,Rating")] Comment comment)
         {
-            comment.time = DateTime.Now;
+            comment.Time = DateTime.Now;
             if (ModelState.IsValid)
             {
 
@@ -71,14 +71,14 @@ namespace WebServer.Controllers
         }
 
         // GET: Comments/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? Id)
         {
-            if (id == null)
+            if (Id == null)
             {
                 return NotFound();
             }
 
-            var comment = await _context.Comment.FindAsync(id);
+            var comment = await _context.Comment.FindAsync(Id);
             if (comment == null)
             {
                 return NotFound();
@@ -91,9 +91,9 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,name,feedback,rating")] Comment comment)
+        public async Task<IActionResult> Edit(int Id, [Bind("Id,Name,Feedback,Rating")] Comment comment)
         {
-            if (id != comment.id)
+            if (Id != comment.Id)
             {
                 return NotFound();
             }
@@ -102,13 +102,13 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    comment.time = DateTime.Now;
+                    comment.Time = DateTime.Now;
                     _context.Update(comment);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CommentExists(comment.id))
+                    if (!CommentExists(comment.Id))
                     {
                         return NotFound();
                     }
@@ -123,15 +123,15 @@ namespace WebServer.Controllers
         }
 
         // GET: Comments/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? Id)
         {
-            if (id == null)
+            if (Id == null)
             {
                 return NotFound();
             }
 
             var comment = await _context.Comment
-                .FirstOrDefaultAsync(m => m.id == id);
+                .FirstOrDefaultAsync(m => m.Id == Id);
             if (comment == null)
             {
                 return NotFound();
@@ -143,9 +143,9 @@ namespace WebServer.Controllers
         // POST: Comments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int Id)
         {
-            var comment = await _context.Comment.FindAsync(id);
+            var comment = await _context.Comment.FindAsync(Id);
             if (comment != null)
             {
                 _context.Comment.Remove(comment);
@@ -155,9 +155,9 @@ namespace WebServer.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CommentExists(int id)
+        private bool CommentExists(int Id)
         {
-            return _context.Comment.Any(e => e.id == id);
+            return _context.Comment.Any(e => e.Id == Id);
         }
     }
 }

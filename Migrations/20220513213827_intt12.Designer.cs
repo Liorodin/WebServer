@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebServer.Data;
 
@@ -11,9 +12,10 @@ using WebServer.Data;
 namespace WebServer.Migrations
 {
     [DbContext(typeof(WebServerContext))]
-    partial class WebServerContextModelSnapshot : ModelSnapshot
+    [Migration("20220513213827_intt12")]
+    partial class intt12
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,9 +109,9 @@ namespace WebServer.Migrations
                     b.Property<DateTime>("Time")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("To")
+                    b.Property<string>("ToUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -118,6 +120,8 @@ namespace WebServer.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MessageListId");
+
+                    b.HasIndex("ToUsername");
 
                     b.ToTable("Message");
                 });
@@ -195,7 +199,15 @@ namespace WebServer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WebServer.Models.User", "To")
+                        .WithMany()
+                        .HasForeignKey("ToUsername")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("MessageList");
+
+                    b.Navigation("To");
                 });
 
             modelBuilder.Entity("WebServer.Models.MessageList", b =>

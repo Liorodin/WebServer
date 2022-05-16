@@ -1,22 +1,22 @@
-﻿@model IEnumerable<WebServer.Models.Contacts>
+﻿@model IEnumerable<WebServer.Models.MessageList>
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>All Contact List</h1>
+<h1>All Chats</h1>
 
-<p>
+@*<p>
     <a asp-action="Create">Create New</a>
-</p>
+</p>*@
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Username)
+                @Html.DisplayNameFor(model => model.Users)
             </th>
             <th>
-                Contact List:
+                @Html.DisplayNameFor(model => model.Messages)
             </th>
         </tr>
     </thead>
@@ -25,16 +25,16 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Username)
-                </td>
-                <td>
-                    @foreach (var user in item.Users)
+                   @foreach (var user in item.Users)
                     {
                         <li>@user.Nickname</li>
                     }
                 </td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.Username">Details</a>
+                   @foreach (var message in item.Messages)
+                    {
+                        <li>@message.Content</li>
+                    }
                 </td>
             </tr>
         }
