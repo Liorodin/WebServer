@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +23,7 @@ namespace WebServer.Controllers
 
         public class TempMessage
         {
-            public string? Content { get; set; }
+            public string? content { get; set; }
         }
 
         public class AddContactResponse
@@ -65,6 +64,7 @@ namespace WebServer.Controllers
             public bool Sent { get; set; }
         }
 
+
         [HttpGet]
         public async Task<IActionResult> GetContacts()
         {
@@ -90,181 +90,5 @@ namespace WebServer.Controllers
             return Json(list);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetContact(string id)
-        {
-            string? username = HttpContext.Session.GetString("username");
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == username);
-            if (loggedUser == null) return NotFound();
-
-            await _context.Chat.Include(x => x.Contacts).ToListAsync();
-
-            // var q = loggedUser.Chats.ToList().;
-
-            // if (loggedUser.Conversations.Count() == 0) return Json("[]");
-            List<GetContactResponse> list = new List<GetContactResponse>();
-
-            //MessageList? chat = await _context.MessageList.Include(x => x.Users).Include(x => x.Messages).FirstOrDefaultAsync(x => x.Users.Contains(getUser) && x.Users.Contains(loggedUser));
-            //ContactResponse con = new ContactResponse(getUser.Username, getUser.Nickname, getUser.Server);
-            //if (chat != null && chat.Messages.Count() > 0)
-            //{
-            //    con.last = chat.Messages.Last().Content;
-            //    con.lastdate = chat.Messages.Last().Time;
-            //}
-            return Json(list);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddContact([Bind("Id,Name,Server")] AddContactResponse contact)
-        {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-
-            Chat newChat = new();
-            Contact newContact = new();
-            newContact.Server = contact.Server;
-            // newContact.Username = contact.Id;
-            newContact.Name = contact.Name;
-            newContact.Chat = newChat;
-
-
-            newChat.Messages = new List<Message>();
-            newChat.Contacts = new List<Contact> { newContact };
-
-            loggedUser.Chats.Add(newChat);
-
-
-            // _context.Add(newChat);
-            // User? NewContact = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == contact.Username);
-            //if (NewContact != null)
-            //{
-
-            //}
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-            //User newUser = new User();
-            //newUser.Username = contact.id;
-            //newUser.Nickname = contact.name;
-            //newUser.Server = contact.server;
-            //Contacts newContacts = new Contacts();
-            //newContacts.Username = newUser.Username;
-            //newContacts.Users = new List<User>();
-
-            //string? username = HttpContext.Session.GetString("username");
-            //User? loggedUser = await _context.User.Include(x => x.Conversations).Include(x => x.Contacts).FirstOrDefaultAsync(m => m.Username == username);
-
-            //loggedUser.Contacts.Add(newContacts);
-            //_context.Add(newUser);
-            //_context.Add(newContacts);
-            //await _context.SaveChangesAsync();
-
-            return Created("", contact);
-        }
-
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteContact(string id)
-        //{
-        //    //string? username = HttpContext.Session.GetString("username");
-        //    //User? loggedUser = await _context.User.Include(x => x.Conversations).Include(x => x.Contacts).FirstOrDefaultAsync(m => m.Username == username);
-        //    //Contacts? removeContact = loggedUser.Contacts.Where(x => x.Username == id).FirstOrDefault();
-        //    //if (removeContact == null) return BadRequest();
-
-        //    //loggedUser.Contacts.Remove(removeContact);
-        //    //// MessageList removeChat = loggedUser.Conversations.Where(x => x.Users.Where(x => x.Username == id));
-        //    //await _context.SaveChangesAsync();
-        //    return NoContent();
-        //}
-
-
-        //[HttpGet("{id}/messages")]
-        //public async Task<IActionResult> GetMessages(string id)
-        //{
-        //    //string? username = HttpContext.Session.GetString("username");
-        //    //User? loggedUser = await _context.User.Include(x => x.Conversations).FirstOrDefaultAsync(m => m.Username == username);
-        //    //foreach (var chat in loggedUser.Conversations)
-        //    //{
-        //    //    MessageList? specificChat = await _context.MessageList.Include(x => x.Users).Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == chat.Id);
-        //    //    User? user = specificChat.Users.Where(x => x.Username == id).FirstOrDefault();
-        //    //    if (user != null)
-        //    //    {
-        //    //        List<MessageResponse> list = new List<MessageResponse>();
-        //    //        foreach (var message in chat.Messages)
-        //    //        {
-        //    //            MessageResponse messageResponse = new MessageResponse(message.Id, message.Content, message.Time, message.To == id);
-        //    //            list.Add(messageResponse);
-        //    //        }
-        //    //        return Json(list);
-        //    //    }
-        //    //}
-        //    return NoContent();
-        //}
-
-        //[HttpGet("{id}/messages/{messageId}")]
-        //public async Task<IActionResult> GetMessage(string id, int messageId)
-        //{
-        //    string? username = HttpContext.Session.GetString("username");
-        //    User? loggedUser = await _context.User.Include(x => x.Conversations).FirstOrDefaultAsync(m => m.Username == username);
-        //    Message? message = await _context.Message.FindAsync(messageId);
-        //    if (message == null) return NoContent();
-        //    if (message.from != username || message.To != id) return NoContent();
-        //    MessageResponse messageResponse = new MessageResponse(messageId, message.Content, message.Time, message.To == id);
-        //    return Json(messageResponse);
-        //}
-
-        //[HttpDelete("{id}/messages/{messageId}")]
-        //public async Task<IActionResult> DeleteMessage(string id, int messageId)
-        //{
-        //    string? username = HttpContext.Session.GetString("username");
-        //    User? loggedUser = await _context.User.Include(x => x.Conversations).FirstOrDefaultAsync(m => m.Username == username);
-        //    Message? message = await _context.Message.FindAsync(messageId);
-        //    if (message == null) return BadRequest();
-        //    if (message.from != username || message.To != id) return BadRequest();
-        //    _context.Message.Remove(message);
-        //    await _context.SaveChangesAsync();
-        //    return NoContent();
-        //}
-
-        //[HttpPost("{id}/messages")]
-        //public async Task<IActionResult> PostMessage([Bind("Content")] TempMessage tempMessage, string id)
-        //{
-        //    //string? username = HttpContext.Session.GetString("username");
-        //    //User? loggedUser = await _context.User.Include(x => x.Conversations).FirstOrDefaultAsync(m => m.Username == username);
-        //    //if (loggedUser == null) return BadRequest();
-        //    //User? sendingTo = await _context.User.FindAsync(id);
-        //    //if (sendingTo == null) return BadRequest();
-        //    //Message message = new Message();
-        //    //message.Content = tempMessage.content;
-        //    //message.from = username;
-        //    //message.To = id;
-        //    //message.Time = DateTime.Now;
-        //    //message.Type = "text";
-        //    //MessageList? currentMessageList = await _context.MessageList.Include(x => x.Users).Include(x => x.Messages).FirstOrDefaultAsync(m => m.Users.Contains(loggedUser) && m.Users.Contains(sendingTo));
-        //    //if (currentMessageList == null) return BadRequest();
-        //    //message.MessageList = currentMessageList;
-        //    //message.MessageListId = currentMessageList.Id;
-
-        //    //currentMessageList.Messages.Add(message);
-        //    //_context.Add(message);
-
-        //    //await _context.SaveChangesAsync();
-        //    return Created("", tempMessage);
-        //}
-
-        //[HttpPut("{id}/messages/{messageId}")]
-        //public async Task<IActionResult> DeleteMessage([Bind("content")] TempMessage newMessage, string id, int messageId)
-        //{
-        //    string? username = HttpContext.Session.GetString("username");
-        //    User? loggedUser = await _context.User.Include(x => x.Conversations).FirstOrDefaultAsync(m => m.Username == username);
-        //    Message? message = await _context.Message.FindAsync(messageId);
-        //    if (message == null) return BadRequest();
-        //    if (message.from != username || message.To != id) return BadRequest();
-        //    message.Content = newMessage.content;
-        //    message.Time = DateTime.Now;
-        //    await _context.SaveChangesAsync();
-        //    return NoContent();
-        //}
     }
 }
-

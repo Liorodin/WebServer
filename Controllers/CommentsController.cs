@@ -27,6 +27,33 @@ namespace WebServer.Controllers
                           Problem("Entity set 'WebServerContext.Comment'  is null.");
         }
 
+        public async Task<IActionResult> Search()
+        {
+            List<Comment> comments = await _context.Comment.ToListAsync();
+            comments.Sort((a, b) => -DateTime.Compare(a.Time, b.Time));
+            return View(comments);
+        }
+
+        [HttpPost]
+
+        public async Task<IActionResult> Search(string query)
+        {
+            var q = from    comment in _context.Comment
+                    where comment.Name.Contains(query) ||
+                    comment.Feedback.Contains(query)
+                    select comment;
+            return View(await q.ToListAsync());
+        }
+
+        public async Task<IActionResult> Search2(string query)
+        {
+            var q = from comment in _context.Comment
+                    where comment.Name.Contains(query) ||
+                    comment.Feedback.Contains(query)
+                    select comment;
+            return Json(await q.ToListAsync());
+        }
+
         // GET: Comments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
