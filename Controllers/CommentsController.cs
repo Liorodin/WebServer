@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,9 +22,9 @@ namespace WebServer.Controllers
         // GET: Comments
         public async Task<IActionResult> Index()
         {
-            List<Comment> comments = await _context.Comment.ToListAsync();
-            comments.Sort((a, b) => -DateTime.Compare(a.Time,b.Time));
-            return View(comments);
+              return _context.Comment != null ? 
+                          View(await _context.Comment.ToListAsync()) :
+                          Problem("Entity set 'WebServerContext.Comment'  is null.");
         }
 
         public async Task<IActionResult> Search()
@@ -56,15 +55,15 @@ namespace WebServer.Controllers
         }
 
         // GET: Comments/Details/5
-        public async Task<IActionResult> Details(int? Id)
+        public async Task<IActionResult> Details(int? id)
         {
-            if (Id == null)
+            if (id == null || _context.Comment == null)
             {
                 return NotFound();
             }
 
             var comment = await _context.Comment
-                .FirstOrDefaultAsync(m => m.Id == Id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (comment == null)
             {
                 return NotFound();
@@ -84,12 +83,10 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Feedback,Rating")] Comment comment)
+        public async Task<IActionResult> Create([Bind("Id,Name,Feedback,Rating,Time")] Comment comment)
         {
-            comment.Time = DateTime.Now;
             if (ModelState.IsValid)
             {
-
                 _context.Add(comment);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -98,14 +95,14 @@ namespace WebServer.Controllers
         }
 
         // GET: Comments/Edit/5
-        public async Task<IActionResult> Edit(int? Id)
+        public async Task<IActionResult> Edit(int? id)
         {
-            if (Id == null)
+            if (id == null || _context.Comment == null)
             {
                 return NotFound();
             }
 
-            var comment = await _context.Comment.FindAsync(Id);
+            var comment = await _context.Comment.FindAsync(id);
             if (comment == null)
             {
                 return NotFound();
@@ -118,9 +115,9 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int Id, [Bind("Id,Name,Feedback,Rating")] Comment comment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Feedback,Rating,Time")] Comment comment)
         {
-            if (Id != comment.Id)
+            if (id != comment.Id)
             {
                 return NotFound();
             }
@@ -129,7 +126,6 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    comment.Time = DateTime.Now;
                     _context.Update(comment);
                     await _context.SaveChangesAsync();
                 }
@@ -150,15 +146,15 @@ namespace WebServer.Controllers
         }
 
         // GET: Comments/Delete/5
-        public async Task<IActionResult> Delete(int? Id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            if (Id == null)
+            if (id == null || _context.Comment == null)
             {
                 return NotFound();
             }
 
             var comment = await _context.Comment
-                .FirstOrDefaultAsync(m => m.Id == Id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (comment == null)
             {
                 return NotFound();
@@ -170,21 +166,25 @@ namespace WebServer.Controllers
         // POST: Comments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int Id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var comment = await _context.Comment.FindAsync(Id);
+            if (_context.Comment == null)
+            {
+                return Problem("Entity set 'WebServerContext.Comment'  is null.");
+            }
+            var comment = await _context.Comment.FindAsync(id);
             if (comment != null)
             {
                 _context.Comment.Remove(comment);
-                await _context.SaveChangesAsync();
-
             }
+            
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CommentExists(int Id)
+        private bool CommentExists(int id)
         {
-            return _context.Comment.Any(e => e.Id == Id);
+          return (_context.Comment?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
