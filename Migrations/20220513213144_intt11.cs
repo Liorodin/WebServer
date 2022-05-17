@@ -4,7 +4,7 @@
 
 namespace WebServer.Migrations
 {
-    public partial class shirin1 : Migration
+    public partial class intt11 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

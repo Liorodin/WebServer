@@ -36,7 +36,7 @@ namespace WebServer.Controllers
             }
 
             var user = await _context.User
-                .FirstOrDefaultAsync(m => m.username == id);
+                .FirstOrDefaultAsync(m => m.Username == id);
             if (user == null)
             {
                 return NotFound();
@@ -56,11 +56,15 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("username,nickname,password,picture")] User user)
+        public async Task<IActionResult> Create([Bind("Username,Nickname,Password,Picture")] User user)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(user);
+                Contacts newUser = new Contacts();
+                newUser.Username = user.Username;
+                newUser.Users = new List<User>();
+                _context.Contacts.Add(newUser);
+                _context.User.Add(user);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -88,9 +92,9 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("username,nickname,password,picture")] User user)
+        public async Task<IActionResult> Edit(string id, [Bind("Username,Nickname,Password,Picture")] User user)
         {
-            if (id != user.username)
+            if (id != user.Username)
             {
                 return NotFound();
             }
@@ -104,7 +108,7 @@ namespace WebServer.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!UserExists(user.username))
+                    if (!UserExists(user.Username))
                     {
                         return NotFound();
                     }
@@ -127,7 +131,7 @@ namespace WebServer.Controllers
             }
 
             var user = await _context.User
-                .FirstOrDefaultAsync(m => m.username == id);
+                .FirstOrDefaultAsync(m => m.Username == id);
             if (user == null)
             {
                 return NotFound();
@@ -149,6 +153,17 @@ namespace WebServer.Controllers
             if (user != null)
             {
                 _context.User.Remove(user);
+                if (_context.Contacts == null)
+                {
+                    return Problem("Entity set 'WebServerContext.Contacts'  is null.");
+                }
+
+                var contacts = await _context.Contacts.FindAsync(id);
+                if (contacts != null)
+                {
+                    _context.Contacts.Remove(contacts);
+                }
+
             }
             
             await _context.SaveChangesAsync();
@@ -157,7 +172,7 @@ namespace WebServer.Controllers
 
         private bool UserExists(string id)
         {
-          return (_context.User?.Any(e => e.username == id)).GetValueOrDefault();
+          return (_context.User?.Any(e => e.Username == id)).GetValueOrDefault();
         }
     }
 }

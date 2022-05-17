@@ -12,6 +12,7 @@ namespace WebServer.Models
         [Required]
         public string? Feedback { get; set; }
 
+        [Required]
         [RegularExpression("^[1-5]$")]
         public int Rating { get; set; }
 
