@@ -197,3 +197,48 @@ textarea {
     .product-review-stars label:nth-of-type(5):hover:before {
         color: #d35400 !important;
     }
+
+.search-container {
+    /*background-image: linear-gradient(rgb(129, 96, 221), rgb(86, 67, 129));*/
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-bar {
+    width: 100%;
+    max-width: 300px;
+    /*background: rgba(255, 255, 255, 0.2);*/
+    background-image: linear-gradient(to left, var(--secondColor), var(--firstColor));
+    display: flex;
+    align-items: center;
+    border-radius: 60px;
+    border-color: rgba(129, 96, 221);
+    padding: 10px;
+}
+
+    .search-input {
+        background: transparent;
+        /*opacity: 0.9;*/
+        display: flex;
+        flex: 1;
+        border-radius: 60px;
+        padding: 20px 20px;
+        font-size: 20px;
+        color: #cccc;
+        max-width: 230px;
+        height: 50px;
+        border: 0;
+    }
+
+::placeholder {
+    color: whitesmoke;
+}
+
+.search-bar button {
+    border: 0;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+}

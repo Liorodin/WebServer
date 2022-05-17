@@ -12,8 +12,8 @@ using WebServer.Data;
 namespace WebServer.Migrations
 {
     [DbContext(typeof(WebServerContext))]
-    [Migration("20220516210549_init5")]
-    partial class init5
+    [Migration("20220513214208_intt13")]
+    partial class intt13
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,22 +24,34 @@ namespace WebServer.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("WebServer.Models.Chat", b =>
+            modelBuilder.Entity("ContactsUser", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Username")
+                    b.Property<string>("ContactsUsername")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("UsersUsername")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("Username");
+                    b.HasKey("ContactsUsername", "UsersUsername");
 
-                    b.ToTable("Chat");
+                    b.HasIndex("UsersUsername");
+
+                    b.ToTable("ContactsUser");
+                });
+
+            modelBuilder.Entity("MessageListUser", b =>
+                {
+                    b.Property<int>("ConversationsId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsersUsername")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ConversationsId", "UsersUsername");
+
+                    b.HasIndex("UsersUsername");
+
+                    b.ToTable("MessageListUser");
                 });
 
             modelBuilder.Entity("WebServer.Models.Comment", b =>
@@ -69,27 +81,14 @@ namespace WebServer.Migrations
                     b.ToTable("Comment");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Contact", b =>
+            modelBuilder.Entity("WebServer.Models.Contacts", b =>
                 {
                     b.Property<string>("Username")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("ChatId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Server")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Username");
 
-                    b.HasIndex("ChatId");
-
-                    b.ToTable("Contact");
+                    b.ToTable("Contacts");
                 });
 
             modelBuilder.Entity("WebServer.Models.Message", b =>
@@ -100,14 +99,14 @@ namespace WebServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("ChatID")
-                        .HasColumnType("int");
-
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("Time")
+                    b.Property<int>("MessageListId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Time")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("To")
@@ -118,15 +117,24 @@ namespace WebServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("from")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageListId");
+
+                    b.ToTable("Message");
+                });
+
+            modelBuilder.Entity("WebServer.Models.MessageList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ChatID");
-
-                    b.ToTable("Message");
+                    b.ToTable("MessageList");
                 });
 
             modelBuilder.Entity("WebServer.Models.User", b =>
@@ -143,6 +151,7 @@ namespace WebServer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Picture")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Username");
@@ -150,45 +159,50 @@ namespace WebServer.Migrations
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Chat", b =>
+            modelBuilder.Entity("ContactsUser", b =>
                 {
-                    b.HasOne("WebServer.Models.User", null)
-                        .WithMany("Chats")
-                        .HasForeignKey("Username");
-                });
-
-            modelBuilder.Entity("WebServer.Models.Contact", b =>
-                {
-                    b.HasOne("WebServer.Models.Chat", "Chat")
-                        .WithMany("Contacts")
-                        .HasForeignKey("ChatId")
+                    b.HasOne("WebServer.Models.Contacts", null)
+                        .WithMany()
+                        .HasForeignKey("ContactsUsername")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Chat");
+                    b.HasOne("WebServer.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersUsername")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MessageListUser", b =>
+                {
+                    b.HasOne("WebServer.Models.MessageList", null)
+                        .WithMany()
+                        .HasForeignKey("ConversationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WebServer.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersUsername")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WebServer.Models.Message", b =>
                 {
-                    b.HasOne("WebServer.Models.Chat", "Chat")
+                    b.HasOne("WebServer.Models.MessageList", "MessageList")
                         .WithMany("Messages")
-                        .HasForeignKey("ChatID")
+                        .HasForeignKey("MessageListId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Chat");
+                    b.Navigation("MessageList");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Chat", b =>
+            modelBuilder.Entity("WebServer.Models.MessageList", b =>
                 {
-                    b.Navigation("Contacts");
-
                     b.Navigation("Messages");
-                });
-
-            modelBuilder.Entity("WebServer.Models.User", b =>
-                {
-                    b.Navigation("Chats");
                 });
 #pragma warning restore 612, 618
         }

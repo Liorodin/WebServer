@@ -45,6 +45,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Users}/{action=Create}/{id?}");
+    pattern: "{controller=Comments}/{action=Search}/{id?}");
+
 
 app.Run();
