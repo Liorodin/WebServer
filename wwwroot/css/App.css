@@ -199,8 +199,6 @@ textarea {
     }
 
 .search-container {
-    height: 100%;
-    width: 100%;
     /*background-image: linear-gradient(rgb(129, 96, 221), rgb(86, 67, 129));*/
     background-size: cover;
     display: flex;
@@ -220,7 +218,7 @@ textarea {
     padding: 10px;
 }
 
-    .search-bar input {
+    .search-input {
         background: transparent;
         /*opacity: 0.9;*/
         display: flex;
