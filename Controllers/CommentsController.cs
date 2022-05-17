@@ -24,8 +24,35 @@ namespace WebServer.Controllers
         public async Task<IActionResult> Index()
         {
             List<Comment> comments = await _context.Comment.ToListAsync();
-            comments.Sort((a, b) => -DateTime.Compare(a.time,b.time));
+            comments.Sort((a, b) => -DateTime.Compare(a.Time,b.Time));
             return View(comments);
+        }
+
+        public async Task<IActionResult> Search()
+        {
+            List<Comment> comments = await _context.Comment.ToListAsync();
+            comments.Sort((a, b) => -DateTime.Compare(a.Time, b.Time));
+            return View(comments);
+        }
+
+        [HttpPost]
+
+        public async Task<IActionResult> Search(string query)
+        {
+            var q = from    comment in _context.Comment
+                    where comment.Name.Contains(query) ||
+                    comment.Feedback.Contains(query)
+                    select comment;
+            return View(await q.ToListAsync());
+        }
+
+        public async Task<IActionResult> Search2(string query)
+        {
+            var q = from comment in _context.Comment
+                    where comment.Name.Contains(query) ||
+                    comment.Feedback.Contains(query)
+                    select comment;
+            return Json(await q.ToListAsync());
         }
 
         // GET: Comments/Details/5
@@ -37,7 +64,7 @@ namespace WebServer.Controllers
             }
 
             var comment = await _context.Comment
-                .FirstOrDefaultAsync(m => m.id == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (comment == null)
             {
                 return NotFound();
@@ -59,7 +86,7 @@ namespace WebServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,name,feedback,rating")] Comment comment)
         {
-            comment.time = DateTime.Now;
+            comment.Time = DateTime.Now;
             if (ModelState.IsValid)
             {
 
@@ -93,7 +120,7 @@ namespace WebServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,name,feedback,rating")] Comment comment)
         {
-            if (id != comment.id)
+            if (id != comment.Id)
             {
                 return NotFound();
             }
@@ -102,13 +129,13 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    comment.time = DateTime.Now;
+                    comment.Time = DateTime.Now;
                     _context.Update(comment);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CommentExists(comment.id))
+                    if (!CommentExists(comment.Id))
                     {
                         return NotFound();
                     }
@@ -131,7 +158,7 @@ namespace WebServer.Controllers
             }
 
             var comment = await _context.Comment
-                .FirstOrDefaultAsync(m => m.id == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (comment == null)
             {
                 return NotFound();
@@ -157,7 +184,7 @@ namespace WebServer.Controllers
 
         private bool CommentExists(int id)
         {
-            return _context.Comment.Any(e => e.id == id);
+            return _context.Comment.Any(e => e.Id == id);
         }
     }
 }

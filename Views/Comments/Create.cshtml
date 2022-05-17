@@ -12,19 +12,19 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="name" class="control-label"></label>
-                <input asp-for="name" class="form-control" />
-                <span asp-validation-for="name" class="text-danger"></span>
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="feedback" class="control-label"></label>
-                <textarea rows="4" cols="50" asp-for="feedback" class="form-control"></textarea>
-                <span asp-validation-for="feedback" class="text-danger"></span>
+                <label asp-for="Feedback" class="control-label"></label>
+                <textarea rows="4" cols="50" asp-for="Feedback" class="form-control"></textarea>
+                <span asp-validation-for="Feedback" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="rating" class="control-label"></label>
+                <label asp-for="Rating" class="control-label"></label>
                 
-                <span asp-validation-for="rating" class="text-danger"></span>
+                <span asp-validation-for="Rating" class="text-danger"></span>
 
                 <link href='https://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
                 <h1 className="stars-rating"></h1>

@@ -1,36 +1,5 @@
 ﻿@model IEnumerable<WebServer.Models.Comment>
 
-@{
-    ViewData["Title"] = "Index";
-}
-
-
-<h1>Comment Section</h1>
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-
-
-<div class="comment-table">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Name)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Feedback)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Rating)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Time)
-                </th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
             @foreach (var item in Model)
             {
                 <tr>
@@ -53,6 +22,3 @@
                     </td>
                 </tr>
             }
-        </tbody>
-    </table>
-</div>
