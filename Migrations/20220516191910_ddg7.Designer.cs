@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebServer.Data;
 
@@ -11,9 +12,10 @@ using WebServer.Data;
 namespace WebServer.Migrations
 {
     [DbContext(typeof(WebServerContext))]
-    partial class WebServerContextModelSnapshot : ModelSnapshot
+    [Migration("20220516191910_ddg7")]
+    partial class ddg7
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,36 +69,6 @@ namespace WebServer.Migrations
                     b.ToTable("Comment");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Contact", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("ChatId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Server")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatId");
-
-                    b.ToTable("Contact");
-                });
-
             modelBuilder.Entity("WebServer.Models.Message", b =>
                 {
                     b.Property<int>("Id")
@@ -105,7 +77,7 @@ namespace WebServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("ChatID")
+                    b.Property<int?>("ChatID")
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
@@ -116,15 +88,12 @@ namespace WebServer.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("To")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("from")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -162,32 +131,17 @@ namespace WebServer.Migrations
                         .HasForeignKey("Username");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Contact", b =>
-                {
-                    b.HasOne("WebServer.Models.Chat", "Chat")
-                        .WithMany("Contacts")
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Chat");
-                });
-
             modelBuilder.Entity("WebServer.Models.Message", b =>
                 {
-                    b.HasOne("WebServer.Models.Chat", "Chat")
+                    b.HasOne("WebServer.Models.Chat", "Chats")
                         .WithMany("Messages")
-                        .HasForeignKey("ChatID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ChatID");
 
-                    b.Navigation("Chat");
+                    b.Navigation("Chats");
                 });
 
             modelBuilder.Entity("WebServer.Models.Chat", b =>
                 {
-                    b.Navigation("Contacts");
-
                     b.Navigation("Messages");
                 });
 

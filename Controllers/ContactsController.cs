@@ -10,6 +10,8 @@ using WebServer.Models;
 
 namespace WebServer.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class ContactsController : Controller
     {
         private readonly WebServerContext _context;
@@ -19,180 +21,74 @@ namespace WebServer.Controllers
             _context = context;
         }
 
-        // GET: Contacts
-        public async Task<IActionResult> Index()
+        public class TempMessage
         {
-            return _context.Contacts != null ?
-                        View(await _context.Contacts.Include(x => x.Users).ToListAsync()) :
-                        Problem("Entity set 'WebServerContext.Contacts'  is null.");
+            public string? content { get; set; }
         }
 
-        // GET: Contacts/Details/5
-        public async Task<IActionResult> Details(string Id)
+        public class AddContactResponse
         {
-            if (Id == null || _context.Contacts == null)
-            {
-                return NotFound();
-            }
-
-            var contacts = await _context.Contacts.Include(x => x.Users)
-                .FirstOrDefaultAsync(m => m.Username == Id);
-            if (contacts == null)
-            {
-                return NotFound();
-            }
-
-            return View(contacts);
+            public string? Id { get; set; }
+            public string? Name { get; set; }
+            public string? Server { get; set; }
         }
 
-        // GET: Contacts/Create
-        public async Task<IActionResult> Create()
+        public class GetContactResponse
         {
-            var users = await _context.User.ToListAsync();
-            ViewBag.Users = new SelectList(users, "Username", "Nickname");
-            return View();
+            public GetContactResponse(string? id, string? name, string? server)
+            {
+                this.Id = id;
+                this.Name = name;
+                this.Server = server;
+            }
+            public string? Id { get; set; }
+            public string? Name { get; set; }
+            public string? Server { get; set; }
+            public string? Last { get; set; }
+            public DateTime? Lastdate { get; set; }
         }
 
-        // POST: Contacts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string Username, string Users)
+        public class MessageResponse
         {
-            if (Username == Users)
+            public MessageResponse(int id, string content, DateTime? created, bool sent)
             {
-                return RedirectToAction("Create");
+                this.Created = created;
+                this.Sent = sent;
+                this.Id = id;
+                this.Content = content;
             }
-            User? thisUSer = await _context.User.FindAsync(Username);
-            if (thisUSer == null) return RedirectToAction("Create");
+            public int Id { get; set; }
+            public string Content { get; set; }
 
-            User? newContact = await _context.User.FindAsync(Users);
-            if (newContact == null) return RedirectToAction("Create");
-
-            Contacts? myContacts = await _context.Contacts.Include(x => x.Users)
-                    .FirstOrDefaultAsync(m => m.Username == Username);
-
-            if (myContacts == null) return RedirectToAction("Create");
-
-            if (!(myContacts.Users.Contains(newContact)))
-            {
-                Contacts? thierContacts = await _context.Contacts.Include(x => x.Users)
-                    .FirstOrDefaultAsync(m => m.Username == Users);
-                if (thierContacts == null) return RedirectToAction("Create");
-                myContacts.Users.Add(newContact);
-                thierContacts.Users.Add(thisUSer);
-
-                MessageList messageList = new MessageList();
-                messageList.Users = new List<User> { thisUSer, newContact };
-                messageList.Messages = new List<Message>();
-                _context.MessageList.Add(messageList);
-
-
-                thisUSer.Conversations = new List<MessageList> { messageList };
-                newContact.Conversations = new List<MessageList> { messageList };
-
-                await _context.SaveChangesAsync();
-            }
-            return RedirectToAction(nameof(Index));
+            public DateTime? Created { get; set; }
+            public bool Sent { get; set; }
         }
 
-        // GET: Contacts/Edit/5
-        public async Task<IActionResult> Edit(string Id)
+
+        [HttpGet]
+        public async Task<IActionResult> GetContacts()
         {
-            if (Id == null || _context.Contacts == null)
-            {
-                return NotFound();
-            }
+            string? loggedUsername = HttpContext.Session.GetString("username");
+            if (loggedUsername == null) return NotFound();
+            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
 
-            var contacts = await _context.Contacts.FindAsync(Id);
-            var users = await _context.User.ToListAsync();
-            ViewBag.Users = new SelectList(users, nameof(Models.User.Username), nameof(Models.User.Nickname));
-            if (contacts == null)
+            if (loggedUser == null) return NotFound();
+            if (loggedUser.Chats.Count() == 0) return Json("[]");
+            List<GetContactResponse> list = new List<GetContactResponse>();
+            foreach (Chat chat in loggedUser.Chats)
             {
-                return NotFound();
-            }
-            return View(contacts);
-        }
-
-        // POST: Contacts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string Id, [Bind("Username")] Contacts contacts, string Users)
-        {
-            if (Id != contacts.Username)
-            {
-                return View(contacts);
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                Chat? findChat = await _context.Chat.Include(x => x.Contacts).Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == chat.Id);
+                Contact contact = findChat.Contacts.First();
+                GetContactResponse con = new GetContactResponse(contact.Username, contact.Name, contact.Server);
+                if (findChat.Messages.Count() > 0)
                 {
-                    User user = await _context.User.FindAsync(Users);
-                    contacts = await _context.Contacts.Include(x => x.Users).FirstOrDefaultAsync(m => m.Username == Id);
-                    contacts.Users.Add(user);
-                    _context.Update(contacts);
-                    await _context.SaveChangesAsync();
+                    con.Last = findChat.Messages.Last().Content;
+                    con.Lastdate = findChat.Messages.Last().Time;
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ContactsExists(contacts.Username))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                list.Add(con);
             }
-            return View(contacts);
+            return Json(list);
         }
 
-        // GET: Contacts/Delete/5
-        public async Task<IActionResult> Delete(string Id)
-        {
-            if (Id == null || _context.Contacts == null)
-            {
-                return NotFound();
-            }
-
-            var contacts = await _context.Contacts
-                .FirstOrDefaultAsync(m => m.Username == Id);
-            if (contacts == null)
-            {
-                return NotFound();
-            }
-
-            return View(contacts);
-        }
-
-        // POST: Contacts/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string Id)
-        {
-            if (_context.Contacts == null)
-            {
-                return Problem("Entity set 'WebServerContext.Contacts'  is null.");
-            }
-            var contacts = await _context.Contacts.FindAsync(Id);
-            if (contacts != null)
-            {
-                _context.Contacts.Remove(contacts);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool ContactsExists(string id)
-        {
-            return (_context.Contacts?.Any(e => e.Username == id)).GetValueOrDefault();
-        }
     }
 }

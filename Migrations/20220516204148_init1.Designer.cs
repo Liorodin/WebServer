@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebServer.Data;
 
@@ -11,9 +12,10 @@ using WebServer.Data;
 namespace WebServer.Migrations
 {
     [DbContext(typeof(WebServerContext))]
-    partial class WebServerContextModelSnapshot : ModelSnapshot
+    [Migration("20220516204148_init1")]
+    partial class init1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,12 +32,7 @@ namespace WebServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Username")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("Username");
 
                     b.ToTable("Chat");
                 });
@@ -86,10 +83,6 @@ namespace WebServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ChatId");
@@ -134,34 +127,6 @@ namespace WebServer.Migrations
                     b.ToTable("Message");
                 });
 
-            modelBuilder.Entity("WebServer.Models.User", b =>
-                {
-                    b.Property<string>("Username")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Nickname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Picture")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Username");
-
-                    b.ToTable("User");
-                });
-
-            modelBuilder.Entity("WebServer.Models.Chat", b =>
-                {
-                    b.HasOne("WebServer.Models.User", null)
-                        .WithMany("Chats")
-                        .HasForeignKey("Username");
-                });
-
             modelBuilder.Entity("WebServer.Models.Contact", b =>
                 {
                     b.HasOne("WebServer.Models.Chat", "Chat")
@@ -189,11 +154,6 @@ namespace WebServer.Migrations
                     b.Navigation("Contacts");
 
                     b.Navigation("Messages");
-                });
-
-            modelBuilder.Entity("WebServer.Models.User", b =>
-                {
-                    b.Navigation("Chats");
                 });
 #pragma warning restore 612, 618
         }

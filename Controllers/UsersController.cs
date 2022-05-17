@@ -22,11 +22,10 @@ namespace WebServer.Controllers
         // GET: Users
         public async Task<IActionResult> Index()
         {
-              return _context.User != null ? 
-                          View(await _context.User.ToListAsync()) :
-                          Problem("Entity set 'WebServerContext.User'  is null.");
+            return _context.User != null ?
+                        View(await _context.User.ToListAsync()) :
+                        Problem("Entity set 'WebServerContext.User'  is null.");
         }
-
         // GET: Users/Details/5
         public async Task<IActionResult> Details(string id)
         {
@@ -56,15 +55,17 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Username,Nickname,Password,Picture")] User user)
+        public async Task<IActionResult> Create([Bind("Username,Nickname,Password,Picture,Server")] User user)
         {
             if (ModelState.IsValid)
             {
-                Contacts newUser = new Contacts();
-                newUser.Username = user.Username;
-                newUser.Users = new List<User>();
-                _context.Contacts.Add(newUser);
-                _context.User.Add(user);
+                var checkExists = await _context.User.FindAsync(user.Username);
+                if (checkExists != null) return RedirectToAction("Create");
+
+                if (user.Picture == null) user.Picture = "avatar";
+
+                user.Chats = new List<Chat>();
+                _context.Add(user);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -92,7 +93,7 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Username,Nickname,Password,Picture")] User user)
+        public async Task<IActionResult> Edit(string id, [Bind("Username,Nickname,Password,Picture,Server")] User user)
         {
             if (id != user.Username)
             {
@@ -153,26 +154,35 @@ namespace WebServer.Controllers
             if (user != null)
             {
                 _context.User.Remove(user);
-                if (_context.Contacts == null)
-                {
-                    return Problem("Entity set 'WebServerContext.Contacts'  is null.");
-                }
-
-                var contacts = await _context.Contacts.FindAsync(id);
-                if (contacts != null)
-                {
-                    _context.Contacts.Remove(contacts);
-                }
-
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool UserExists(string id)
         {
-          return (_context.User?.Any(e => e.Username == id)).GetValueOrDefault();
+            return (_context.User?.Any(e => e.Username == id)).GetValueOrDefault();
+        }
+
+        // GET: Users/Login
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Login([Bind("Username,Password")] User user)
+        {
+            var q = _context.User.Where(e => e.Username == user.Username && e.Password == user.Password);
+            if (q.Any())
+            {
+                HttpContext.Session.SetString("username", q.First().Username);
+                return Ok();
+            }
+            ViewData["Error"] = "Username and/or password are incorrect.";
+            return View();
         }
     }
 }

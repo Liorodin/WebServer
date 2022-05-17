@@ -4,7 +4,7 @@
 
 namespace WebServer.Migrations
 {
-    public partial class intt9 : Migration
+    public partial class ddg9 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

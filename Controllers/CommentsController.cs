@@ -24,7 +24,7 @@ namespace WebServer.Controllers
         public async Task<IActionResult> Index()
         {
             List<Comment> comments = await _context.Comment.ToListAsync();
-            comments.Sort((a, b) => -DateTime.Compare(a.Time,b.Time));
+            comments.Sort((a, b) => -DateTime.Compare(a.Time, b.Time));
             return View(comments);
         }
 
