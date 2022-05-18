@@ -84,10 +84,11 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Feedback,Rating,Time")] Comment comment)
+        public async Task<IActionResult> Create([Bind("Id,Name,Feedback,Rating")] Comment comment)
         {
             if (ModelState.IsValid)
             {
+                comment.Time = DateTime.Now;
                 _context.Add(comment);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -116,17 +117,17 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Feedback,Rating,Time")] Comment comment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Feedback,Rating")] Comment comment)
         {
             if (id != comment.Id)
             {
                 return NotFound();
             }
-
             if (ModelState.IsValid)
             {
                 try
                 {
+                    comment.Time = DateTime.Now;
                     _context.Update(comment);
                     await _context.SaveChangesAsync();
                 }
