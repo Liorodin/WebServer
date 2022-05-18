@@ -77,8 +77,8 @@ namespace WebServer.Controllers
             List<GetContactResponse> list = new List<GetContactResponse>();
             foreach (Chat chat in loggedUser.Chats)
             {
-                Chat? findChat = await _context.Chat.Include(x => x.Contacts).Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == chat.Id);
-                Contact contact = findChat.Contacts.First();
+                Chat? findChat = await _context.Chat.Include(x => x.Contact).Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == chat.Id);
+                Contact contact = findChat.Contact;
                 GetContactResponse con = new GetContactResponse(contact.Username, contact.Name, contact.Server);
                 if (findChat.Messages.Count() > 0)
                 {
@@ -97,11 +97,11 @@ namespace WebServer.Controllers
             User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == username);
             if (loggedUser == null) return NotFound();
 
-            await _context.Chat.Include(x => x.Contacts).ToListAsync();
+            await _context.Chat.Include(x => x.Contact).ToListAsync();
 
-            // var q = loggedUser.Chats.ToList().;
+            var chats = loggedUser.Chats.ToList();
 
-            // if (loggedUser.Conversations.Count() == 0) return Json("[]");
+             if (loggedUser.Chats.Count() == 0) return Json("[]");
             List<GetContactResponse> list = new List<GetContactResponse>();
 
             //MessageList? chat = await _context.MessageList.Include(x => x.Users).Include(x => x.Messages).FirstOrDefaultAsync(x => x.Users.Contains(getUser) && x.Users.Contains(loggedUser));
@@ -120,46 +120,22 @@ namespace WebServer.Controllers
             string? loggedUsername = HttpContext.Session.GetString("username");
             if (loggedUsername == null) return NotFound();
             User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-
+            foreach (Chat chat in loggedUser.Chats)
+            {
+                Chat findChat = await _context.Chat.Include(x => x.Contact).FirstOrDefaultAsync(y=>y.Id==chat.Id);
+                if (findChat.Contact.Username == contact.Id) return BadRequest();
+            }
             Chat newChat = new();
             Contact newContact = new();
-            newContact.Server = contact.Server;
-            // newContact.Username = contact.Id;
+            newContact.Username = contact.Id;
             newContact.Name = contact.Name;
+            newContact.Server = contact.Server;
             newContact.Chat = newChat;
-
-
             newChat.Messages = new List<Message>();
-            newChat.Contacts = new List<Contact> { newContact };
-
+            newChat.Contact = newContact;
             loggedUser.Chats.Add(newChat);
-
-
-            // _context.Add(newChat);
-            // User? NewContact = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == contact.Username);
-            //if (NewContact != null)
-            //{
-
-            //}
-
+            _context.Add(newChat);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-            //User newUser = new User();
-            //newUser.Username = contact.id;
-            //newUser.Nickname = contact.name;
-            //newUser.Server = contact.server;
-            //Contacts newContacts = new Contacts();
-            //newContacts.Username = newUser.Username;
-            //newContacts.Users = new List<User>();
-
-            //string? username = HttpContext.Session.GetString("username");
-            //User? loggedUser = await _context.User.Include(x => x.Conversations).Include(x => x.Contacts).FirstOrDefaultAsync(m => m.Username == username);
-
-            //loggedUser.Contacts.Add(newContacts);
-            //_context.Add(newUser);
-            //_context.Add(newContacts);
-            //await _context.SaveChangesAsync();
-
             return Created("", contact);
         }
 
