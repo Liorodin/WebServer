@@ -22,11 +22,10 @@ namespace WebServer.Controllers
         // GET: Users
         public async Task<IActionResult> Index()
         {
-              return _context.User != null ? 
-                          View(await _context.User.ToListAsync()) :
-                          Problem("Entity set 'WebServerContext.User'  is null.");
+            return _context.User != null ?
+                        View(await _context.User.ToListAsync()) :
+                        Problem("Entity set 'WebServerContext.User'  is null.");
         }
-
         // GET: Users/Details/5
         public async Task<IActionResult> Details(string id)
         {
