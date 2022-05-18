@@ -41,7 +41,7 @@ namespace WebServer.Controllers
 
             if (loggedUsername != "LeonardoR" || loggedUsername != "SirinB") return BadRequest();
 
-            User? deleteUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == id));
+            User? deleteUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == id);
 
             if (deleteUser == null) return BadRequest();
 
