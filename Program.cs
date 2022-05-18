@@ -45,6 +45,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Comments}/{action=Create}/{id?}");
+
+    pattern: "{controller=Comments}/{action=Index}/{id?}");
 
 app.Run();
