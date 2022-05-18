@@ -16,7 +16,7 @@
 </head>
 
 <div class="search-container">
-        <form asp-action="Search" class="search-bar">
+        <form class="search-bar" id="search-for">
             <input class="search-input" name="query" id="search" placeholder="search any thing" />
             <button type="submit">  <i class="fas fa-search"></i></button>
         </form>
@@ -43,7 +43,7 @@
                 <th></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="body-search">
             @foreach (var item in Model)
             {
                 <tr>
@@ -60,8 +60,8 @@
                         @Html.DisplayFor(modelItem => item.Time)
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                         <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                     </td>
                 </tr>
@@ -70,27 +70,29 @@
     </table>
 </div>
 
+
 @section Scripts{
     <script type="text/html" id="template">
         <tr>
             <td>
-                {Name}
+                {name}
             </td>
             <td>
-                {Feedback}
+                {feedback}
             </td>
             <td>
-                {Rating}
+                {rating}
             </td>
             <td>
-                {Time}
+                {time}
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="{Name}">Edit</a>
-                <a asp-action="Details" asp-route-id="{Name}">Details</a>
-                <a asp-action="Delete" asp-route-id="{Name}">Delete</a>
+                <a asp-action="Edit" asp-route-id="{id}">Edit</a> |
+                <a asp-action="Details" asp-route-id="{id}">Details</a> |
+                <a asp-action="Delete" asp-route-id="{id}">Delete</a>
             </td>
         </tr>
     </script>
     <script src="~/js/search.js"></script>
  }
+
