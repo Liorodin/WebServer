@@ -7,9 +7,9 @@ namespace WebServer.Models
         [Key]
         public int Id { get; set; }
 
+        public Contact Contact { get; set; }
+
         public ICollection<Message> Messages { get; set; }
-
-        public ICollection<Contact> Contacts { get; set; }
-
+     
     }
 }
