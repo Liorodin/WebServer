@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,8 @@ using WebServer.Models;
 
 namespace WebServer.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class UsersController : Controller
     {
         private readonly WebServerContext _context;
@@ -19,145 +22,38 @@ namespace WebServer.Controllers
             _context = context;
         }
 
-        // GET: Users
-        public async Task<IActionResult> Index()
+        public class LoginUser
         {
-            return _context.User != null ?
-                        View(await _context.User.ToListAsync()) :
-                        Problem("Entity set 'WebServerContext.User'  is null.");
-        }
-        // GET: Users/Details/5
-        public async Task<IActionResult> Details(string id)
-        {
-            if (id == null || _context.User == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.User
-                .FirstOrDefaultAsync(m => m.Username == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
+            public string Username { get; set; }
+            public string Password { get; set; }
         }
 
-        // GET: Users/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Users/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Username,Nickname,Password,Picture,Server")] User user)
-        {
-            if (ModelState.IsValid)
-            {
-                var checkExists = await _context.User.FindAsync(user.Username);
-                if (checkExists != null) return RedirectToAction("Create");
-
-                if (user.Picture == null) user.Picture = "avatar";
-
-                user.Chats = new List<Chat>();
-                _context.Add(user);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(user);
-        }
-
-        // GET: Users/Edit/5
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (id == null || _context.User == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.User.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return View(user);
-        }
-
-        // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Username,Nickname,Password,Picture,Server")] User user)
-        {
-            if (id != user.Username)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserExists(user.Username))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(user);
-        }
-
-        // GET: Users/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (id == null || _context.User == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.User
-                .FirstOrDefaultAsync(m => m.Username == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUser(string id)
         {
             if (_context.User == null)
             {
                 return Problem("Entity set 'WebServerContext.User'  is null.");
             }
-            var user = await _context.User.FindAsync(id);
-            if (user != null)
+
+            string? loggedUsername = HttpContext.Session.GetString("username");
+            if (loggedUsername == null) return BadRequest();
+
+            if (loggedUsername != "LeonardoR" || loggedUsername != "SirinB") return BadRequest();
+
+            User? deleteUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == id);
+
+            if (deleteUser == null) return BadRequest();
+
+            foreach (var chat in deleteUser.Chats)
             {
-                _context.User.Remove(user);
+                Chat findChat = await _context.Chat.Include(y=>y.Contact).FirstOrDefaultAsync(z=>z.Id==chat.Id);
+                _context.Contact.Remove(findChat.Contact);
             }
+            _context.User.Remove(deleteUser);
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Ok();
         }
 
         private bool UserExists(string id)
@@ -165,16 +61,33 @@ namespace WebServer.Controllers
             return (_context.User?.Any(e => e.Username == id)).GetValueOrDefault();
         }
 
-        // GET: Users/Login
-        [HttpGet]
-        public IActionResult Login()
+        [AllowAnonymous]
+        [HttpPost("Login")]
+        public async Task<IActionResult> Register([Bind("Username,Nickname,Password,Picture")] User newUser)
         {
-            return View();
+            if (_context.User == null)
+            {
+                return Problem("Entity set 'WebServerContext.User' is null.");
+            }
+
+            if (await _context.User.FindAsync(newUser.Username) != null) return BadRequest();
+            if (newUser.Picture == null) newUser.Picture = "avatar";
+
+            newUser.Chats = new List<Chat>();
+            _context.Add(newUser);
+            await _context.SaveChangesAsync();
+            return Ok();
         }
 
-        [HttpPost]
-        public IActionResult Login([Bind("Username,Password")] User user)
+        [AllowAnonymous]
+        [HttpPost("Login")]
+        public IActionResult Login([Bind("Username,Password")] LoginUser user)
         {
+            if (_context.User == null)
+            {
+                return Problem("Entity set 'WebServerContext.User' is null.");
+            }
+
             var q = _context.User.Where(e => e.Username == user.Username && e.Password == user.Password);
             if (q.Any())
             {
@@ -182,7 +95,7 @@ namespace WebServer.Controllers
                 return Ok();
             }
             ViewData["Error"] = "Username and/or password are incorrect.";
-            return View();
+            return NotFound();
         }
     }
 }
