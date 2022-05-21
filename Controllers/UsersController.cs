@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using WebServer.Data;
 using WebServer.Models;
 
@@ -16,10 +20,11 @@ namespace WebServer.Controllers
     public class UsersController : Controller
     {
         private readonly WebServerContext _context;
-
-        public UsersController(WebServerContext context)
+        public IConfiguration _configuration;
+        public UsersController(WebServerContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public class LoginUser
@@ -47,7 +52,7 @@ namespace WebServer.Controllers
 
             foreach (var chat in deleteUser.Chats)
             {
-                Chat findChat = await _context.Chat.Include(y=>y.Contact).FirstOrDefaultAsync(z=>z.Id==chat.Id);
+                Chat findChat = await _context.Chat.Include(y => y.Contact).FirstOrDefaultAsync(z => z.Id == chat.Id);
                 _context.Contact.Remove(findChat.Contact);
             }
             _context.User.Remove(deleteUser);
@@ -62,7 +67,7 @@ namespace WebServer.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("Login")]
+        [HttpPost("Register")]
         public async Task<IActionResult> Register([Bind("Username,Nickname,Password,Picture")] User newUser)
         {
             if (_context.User == null)
@@ -91,8 +96,24 @@ namespace WebServer.Controllers
             var q = _context.User.Where(e => e.Username == user.Username && e.Password == user.Password);
             if (q.Any())
             {
-                HttpContext.Session.SetString("username", q.First().Username);
-                return Ok();
+                var Claims = new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub , _configuration["JWTParams:Subject"]),
+                    new Claim(JwtRegisteredClaimNames.Jti , Guid.NewGuid().ToString()),
+                    new Claim(JwtRegisteredClaimNames.Iat , DateTime.Now.ToString()),
+                    new Claim("Username",user.Username)
+                };
+                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWTParams:SecretKey"]));
+                var mac = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+                var token = new JwtSecurityToken(
+                    _configuration["JWTParams:Issuer"],
+                    _configuration["JWTParams:Audience"],
+                    Claims,
+                    expires: DateTime.Now.AddMinutes(20),
+                    signingCredentials: mac);
+                return Ok(new JwtSecurityTokenHandler().WriteToken(token));
+                //HttpContext.Session.SetString("username", q.First().Username);
+                //return Json(HttpContext.Session.Id);
             }
             ViewData["Error"] = "Username and/or password are incorrect.";
             return NotFound();

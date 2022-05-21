@@ -8,9 +8,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebServer.Data;
 using WebServer.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace WebServer.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ContactsController : Controller
@@ -68,10 +71,12 @@ namespace WebServer.Controllers
         [HttpGet]
         public async Task<IActionResult> GetContacts()
         {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
+            var user = HttpContext.User.Identity as ClaimsIdentity;
+            if (user.IsAuthenticated == false) return BadRequest();
 
+            var userClaims = user.Claims;
+            string username = user.Claims.FirstOrDefault(x => x.Type == "Username").Value;
+            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == username);
             if (loggedUser == null) return NotFound();
             if (loggedUser.Chats.Count() == 0) return Json("[]");
             List<GetContactResponse> list = new List<GetContactResponse>();
@@ -195,7 +200,7 @@ namespace WebServer.Controllers
         }
 
         [HttpGet("{id}/messages")]
-        public async Task<IActionResult> GetMessage(string id)
+        public async Task<IActionResult> GetMessages(string id)
         {
             string? loggedUsername = HttpContext.Session.GetString("username");
             if (loggedUsername == null) return NotFound();
