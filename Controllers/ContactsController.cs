@@ -68,17 +68,19 @@ namespace WebServer.Controllers
             public bool Sent { get; set; }
         }
 
+        private User GetLoggedUser(HttpContext context)
+        {
+            var user = context.User.Identity as ClaimsIdentity;
+            if (user.IsAuthenticated == false) return null;
+            string username = user.Claims.FirstOrDefault(x => x.Type == "Username").Value;
+            return _context.User.Include(x => x.Chats).FirstOrDefault(m => m.Username == username);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetContacts()
         {
-            var user = HttpContext.User.Identity as ClaimsIdentity;
-            if (user.IsAuthenticated == false) return BadRequest();
-
-            var userClaims = user.Claims;
-            string username = user.Claims.FirstOrDefault(x => x.Type == "Username").Value;
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == username);
-            if (loggedUser == null) return NotFound();
-            if (loggedUser.Chats.Count() == 0) return Json("[]");
+            User loggedUser = GetLoggedUser(HttpContext);
+            if (loggedUser.Chats.Count == 0) return Json("[]");
             List<GetContactResponse> list = new List<GetContactResponse>();
             foreach (Chat chat in loggedUser.Chats)
             {
@@ -98,11 +100,7 @@ namespace WebServer.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetContact(string id)
         {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-            if (loggedUser == null) return NotFound();
+            User loggedUser = GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
 
@@ -129,10 +127,7 @@ namespace WebServer.Controllers
         [HttpPost]
         public async Task<IActionResult> AddContact([Bind("Id,Name,Server")] AddContactResponse contact)
         {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-            if (loggedUser == null) return NotFound();
+            User loggedUser = GetLoggedUser(HttpContext);
             foreach (Chat chat in loggedUser.Chats)
             {
                 Chat findChat = await _context.Chat.Include(x => x.Contact).FirstOrDefaultAsync(y => y.Id == chat.Id);
@@ -155,10 +150,7 @@ namespace WebServer.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteContact(string id)
         {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-            if (loggedUser == null) return NotFound();
+            User loggedUser = GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
 
@@ -179,10 +171,7 @@ namespace WebServer.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> EditContact([Bind("Id,Name,Server")] AddContactResponse contact ,string id)
         {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-            if (loggedUser == null) return NotFound();
+            User loggedUser = GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
@@ -202,11 +191,7 @@ namespace WebServer.Controllers
         [HttpGet("{id}/messages")]
         public async Task<IActionResult> GetMessages(string id)
         {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-            if (loggedUser == null) return NotFound();
+            User loggedUser = GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
@@ -219,7 +204,7 @@ namespace WebServer.Controllers
                 List<MessageResponse> messages = new();
                 foreach (var message in findChat.Messages)
                 {
-                    MessageResponse messageResponse = new MessageResponse(message.Id, message.Content, message.Time, message.from == loggedUsername);
+                    MessageResponse messageResponse = new MessageResponse(message.Id, message.Content, message.Time, message.from == loggedUser.Username);
                     messages.Add(messageResponse);
                 }
                 return Json(messages);
@@ -230,11 +215,7 @@ namespace WebServer.Controllers
         [HttpGet("{id}/messages/{messageId}")]
         public async Task<IActionResult> GetMessage(string id, int messageId)
         {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-            if (loggedUser == null) return NotFound();
+            User loggedUser = GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
@@ -247,7 +228,7 @@ namespace WebServer.Controllers
                 Message findMessage = await _context.Message.FindAsync(messageId);
                 if (findMessage == null) return NotFound();
                 if (!(findChat.Messages.Contains(findMessage))) return NotFound();
-                MessageResponse messageResponse = new MessageResponse(findMessage.Id, findMessage.Content, findMessage.Time, findMessage.from == loggedUsername);
+                MessageResponse messageResponse = new MessageResponse(findMessage.Id, findMessage.Content, findMessage.Time, findMessage.from == loggedUser.Username);
                 return Json(messageResponse);
             }
             return NotFound();
@@ -256,11 +237,7 @@ namespace WebServer.Controllers
         [HttpPost("{id}/messages")]
         public async Task<IActionResult> PostMessage([Bind("Content")] TempMessage tempMessage, string id)
         {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-            if (loggedUser == null) return NotFound();
+            User loggedUser = GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
@@ -272,7 +249,7 @@ namespace WebServer.Controllers
             {
                 Message message = new Message();
                 message.Content = tempMessage.Content;
-                message.from = loggedUsername;
+                message.from = loggedUser.Username;
                 message.To = id;
                 message.Time = DateTime.Now;
                 message.Type = "text";
@@ -286,11 +263,7 @@ namespace WebServer.Controllers
         [HttpPut("{id}/messages/{messageId}")]
         public async Task<IActionResult> EditMessage([Bind("content")] TempMessage message, string id, int messageId)
         {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-            if (loggedUser == null) return NotFound();
+            User loggedUser = GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
@@ -315,11 +288,7 @@ namespace WebServer.Controllers
         [HttpDelete("{id}/messages/{messageId}")]
         public async Task<IActionResult> DeleteMessage(string id, int messageId)
         {
-            string? loggedUsername = HttpContext.Session.GetString("username");
-            if (loggedUsername == null) return NotFound();
-
-            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == loggedUsername);
-            if (loggedUser == null) return NotFound();
+            User loggedUser = GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
