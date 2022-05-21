@@ -36,10 +36,7 @@ namespace WebServer.Controllers
         // GET: Comments
         public IActionResult Index()
         {
-<<<<<<< HEAD
             ViewBag.RatingAvg = Average();
-=======
->>>>>>> 30991e981e0c2734afde741704d2d51f1d2102a7
             return View(_service.GetAll());
         }
 
