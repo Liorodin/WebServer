@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using WebServer.Data;
+﻿using WebServer.Data;
 using WebServer.Models;
 
-namespace WebServer.Services
+namespace WebServer.Services.Comments
 {
     public class CommentService : ICommentService
     {
@@ -30,9 +22,9 @@ namespace WebServer.Services
 
         public void Edit(Comment comment)
         {
-            if(Get(comment.Id)==null) return;
-            comment.Time = DateTime.Now;
-            _context.Update(comment);
+            if (Get(comment.Id) == null) return;
+            comment.Time = DateTime.Now.ToString();
+            _context.Update(comment);        
             _context.SaveChanges();
             return;
         }
@@ -44,16 +36,16 @@ namespace WebServer.Services
             return comment;
         }
 
-        public  List<Comment> GetAll()
+        public List<Comment> GetAll()
         {
-            return  _context.Comment != null ? _context.Comment.ToList() : new List<Comment>();
+            return _context.Comment != null ? _context.Comment.ToList() : new List<Comment>();
 
         }
 
         public void Create(Comment comment)
         {
             if (Get(comment.Id) != null) return;
-            comment.Time = DateTime.Now;
+            comment.Time = DateTime.Now.ToString();
             _context.Add(comment);
             _context.SaveChanges();
             return;
@@ -62,9 +54,9 @@ namespace WebServer.Services
         public List<Comment> serch(string query)
         {
             var list = from comment in _context.Comment
-                    where comment.Name.Contains(query) ||
-                    comment.Feedback.Contains(query)
-                    select comment;
+                       where comment.Name.Contains(query) ||
+                       comment.Feedback.Contains(query)
+                       select comment;
             return list.ToList();
         }
     }

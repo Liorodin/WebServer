@@ -70,13 +70,9 @@ namespace WebServer.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([Bind("Username,Nickname,Password,Picture")] User newUser)
         {
-            if (_context.User == null)
-            {
-                return Problem("Entity set 'WebServerContext.User' is null.");
-            }
+            if (_context.User == null) return NotFound();
 
             if (await _context.User.FindAsync(newUser.Username) != null) return BadRequest();
-            if (newUser.Picture == null) newUser.Picture = "avatar";
 
             newUser.Chats = new List<Chat>();
             _context.Add(newUser);
