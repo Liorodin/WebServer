@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using WebServer.Data;
 using WebServer.Models;
 using WebServer.Services;
+using WebServer.Services.Comments;
 
 namespace WebServer.Controllers
 {
@@ -45,7 +46,7 @@ namespace WebServer.Controllers
         //    return View(await q.ToListAsync());
         //}
 
-        public async Task<IActionResult> Search(string query)
+        public IActionResult Search(string query)
         {
             var list = _service.serch(query);
             return Json(list);
@@ -53,7 +54,7 @@ namespace WebServer.Controllers
 
 
         // GET: Comments/Details/5
-        public async Task<IActionResult> Details(int id)
+        public IActionResult Details(int id)
         {
             Comment comment = _service.Get(id);
             if (comment == null) return NotFound();
@@ -71,7 +72,7 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Feedback,Rating")] Comment comment)
+        public IActionResult Create([Bind("Id,Name,Feedback,Rating")] Comment comment)
         {
             if (!(ModelState.IsValid)) return View(comment);
             _service.Create(comment);

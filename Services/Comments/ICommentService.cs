@@ -1,6 +1,6 @@
 ﻿using WebServer.Models;
 
-namespace WebServer.Services
+namespace WebServer.Services.Comments
 {
     public interface ICommentService
     {
