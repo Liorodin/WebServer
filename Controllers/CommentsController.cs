@@ -8,24 +8,23 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebServer.Data;
 using WebServer.Models;
+using WebServer.Services;
 
 namespace WebServer.Controllers
 {
     public class CommentsController : Controller
     {
-        private readonly WebServerContext _context;
+        private readonly ICommentService _service;
 
         public CommentsController(WebServerContext context)
         {
-            _context = context;
+            _service = new CommentService(context);
         }
 
         // GET: Comments
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-              return _context.Comment != null ? 
-                          View(await _context.Comment.ToListAsync()) :
-                          Problem("Entity set 'WebServerContext.Comment'  is null.");
+            return View(_service.GetAll());
         }
 
         //[HttpPost]
@@ -48,29 +47,16 @@ namespace WebServer.Controllers
 
         public async Task<IActionResult> Search(string query)
         {
-            var q = from comment in _context.Comment
-                    where comment.Name.Contains(query) ||
-                    comment.Feedback.Contains(query)
-                    select comment;
-            return Json(await q.ToListAsync());
+            var list = _service.serch(query);
+            return Json(list);
         }
 
 
         // GET: Comments/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null || _context.Comment == null)
-            {
-                return NotFound();
-            }
-
-            var comment = await _context.Comment
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
+            Comment comment = _service.Get(id);
+            if (comment == null) return NotFound();
             return View(comment);
         }
 
@@ -87,29 +73,16 @@ namespace WebServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Feedback,Rating")] Comment comment)
         {
-            if (ModelState.IsValid)
-            {
-                comment.Time = DateTime.Now;
-                _context.Add(comment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(comment);
+            if (!(ModelState.IsValid)) return View(comment);
+            _service.Create(comment);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Comments/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int id)
         {
-            if (id == null || _context.Comment == null)
-            {
-                return NotFound();
-            }
-
-            var comment = await _context.Comment.FindAsync(id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
+            Comment comment = _service.Get(id);
+            if (comment == null) return NotFound();
             return View(comment);
         }
 
@@ -118,76 +91,29 @@ namespace WebServer.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Feedback,Rating")] Comment comment)
+        public IActionResult Edit(int id, [Bind("Id,Name,Feedback,Rating")] Comment comment)
         {
-            if (id != comment.Id)
-            {
-                return NotFound();
-            }
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    comment.Time = DateTime.Now;
-                    _context.Update(comment);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CommentExists(comment.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(comment);
+            if (id != comment.Id) return NotFound();
+            if (!(ModelState.IsValid)) return View(comment);
+            _service.Edit(comment);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Comments/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int id)
         {
-            if (id == null || _context.Comment == null)
-            {
-                return NotFound();
-            }
-
-            var comment = await _context.Comment
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
+            Comment comment = _service.Get(id);
+            if (comment == null) return NotFound();
             return View(comment);
         }
 
         // POST: Comments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            if (_context.Comment == null)
-            {
-                return Problem("Entity set 'WebServerContext.Comment'  is null.");
-            }
-            var comment = await _context.Comment.FindAsync(id);
-            if (comment != null)
-            {
-                _context.Comment.Remove(comment);
-            }
-            
-            await _context.SaveChangesAsync();
+            _service.Delete(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool CommentExists(int id)
-        {
-          return (_context.Comment?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
