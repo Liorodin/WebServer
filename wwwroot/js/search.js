@@ -21,4 +21,18 @@
         console.log(results);
         $('#body-search').html(results);
     });
+
+    //self.onmessage = (event) => {
+    //    let x = 0;
+    //    let i = 0;
+
+    //    for (i = 0; i < event.data.length; i++) {
+    //        x += event.data[i];
+    //    }
+
+    //    x /= event.data.length;
+
+    //    self.postMessage(x);
+    //    self.close();
+    //};
 });

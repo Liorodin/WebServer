@@ -22,28 +22,10 @@ namespace WebServer.Controllers
         // GET: Comments
         public async Task<IActionResult> Index()
         {
-              return _context.Comment != null ? 
+              return _context.Comment != null ?                
                           View(await _context.Comment.ToListAsync()) :
                           Problem("Entity set 'WebServerContext.Comment'  is null.");
         }
-
-        //[HttpPost]
-
-        //public async Task<IActionResult> Search()
-        //{
-        //    List<Comment> comments = await _context.Comment.ToListAsync();
-        //    comments.Sort((a, b) => -DateTime.Compare(a.Time, b.Time));
-        //    return View(comments);
-        //}
-
-        //public async Task<IActionResult> Search(string query)
-        //{
-        //    var q = from    comment in _context.Comment
-        //            where comment.Name.Contains(query) ||
-        //            comment.Feedback.Contains(query)
-        //            select comment;
-        //    return View(await q.ToListAsync());
-        //}
 
         public async Task<IActionResult> Search(string query)
         {
