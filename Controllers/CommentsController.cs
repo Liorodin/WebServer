@@ -21,16 +21,22 @@ namespace WebServer.Controllers
             _service = new CommentService(context);
         }
 
+        public double Average()
+        {
+            double sum = 0;
+            List<Comment> comments = _service.GetAll();
+            foreach (var comment in comments)
+            {
+                sum += comment.Rating;
+            }
+            return comments.Count != 0 ? Math.Round(sum / comments.Count, 2) : 0;
+        }
+
         // GET: Comments
         public IActionResult Index()
         {
-<<<<<<< HEAD
-              return _context.Comment != null ?                
-                          View(await _context.Comment.ToListAsync()) :
-                          Problem("Entity set 'WebServerContext.Comment'  is null.");
-=======
+            ViewBag.RatingAvg = Average();
             return View(_service.GetAll());
->>>>>>> 14e8010f0d4363f10b40fb10fce2e6e3d0168d7b
         }
 
         public async Task<IActionResult> Search(string query)

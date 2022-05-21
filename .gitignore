@@ -365,3 +365,5 @@ FodyWeavers.xsd
 /Migrations/20220517204824_init1.cs
 /Migrations/20220517203429_init.Designer.cs
 /Migrations/20220517203429_init.cs
+/Migrations/20220521204716_s.cs
+/Migrations/20220521204716_s.Designer.cs
