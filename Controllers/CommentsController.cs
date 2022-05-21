@@ -28,24 +28,6 @@ namespace WebServer.Controllers
             return View(_service.GetAll());
         }
 
-        //[HttpPost]
-
-        //public async Task<IActionResult> Search()
-        //{
-        //    List<Comment> comments = await _context.Comment.ToListAsync();
-        //    comments.Sort((a, b) => -DateTime.Compare(a.Time, b.Time));
-        //    return View(comments);
-        //}
-
-        //public async Task<IActionResult> Search(string query)
-        //{
-        //    var q = from    comment in _context.Comment
-        //            where comment.Name.Contains(query) ||
-        //            comment.Feedback.Contains(query)
-        //            select comment;
-        //    return View(await q.ToListAsync());
-        //}
-
         public IActionResult Search(string query)
         {
             var list = _service.serch(query);

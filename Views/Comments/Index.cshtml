@@ -10,18 +10,39 @@
     <a asp-action="Create">Create New</a>
 </p>
 
+
+
+@*@{
+        var sum = 0;
+        var counter = 0;
+        foreach (var item in Model)
+            {
+                sum += item.Rating;
+                ++counter;
+            }
+        var avg = sum / counter;
+  }*@
+
+<p>
+   <dl class="row">
+                <dd class="col-sm-2">Rating average: </dd>
+                    <dd class="col-sm-10" value={avg}>
+                        avg
+                    </dd>
+                </dl>
+</p>
+
 <head>
     <link rel="stylesheet" href="search.css">
     <script src="https://kit.fontawesome.com/7f6d2012d0.js"></script>
 </head>
 
 <div class="search-container">
-        <form class="search-bar" id="search-for">
-            <input class="search-input" name="query" id="search" placeholder="search any thing" />
-            <button type="submit">  <i class="fas fa-search"></i></button>
-        </form>
+            <form class="search-bar" id="search-for">
+           <input class="search-input" name="query" id="search" placeholder="search any thing" />
+           <button type="submit">  <i class="fas fa-search"></i></button>
+           </form>
 </div>
-
 
 
 <div class="comment-table">
