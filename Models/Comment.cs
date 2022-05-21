@@ -16,6 +16,6 @@ namespace WebServer.Models
         [RegularExpression("^[1-5]$")]
         public int Rating { get; set; }
 
-        public DateTime? Time { get; set; }
+        public string? Time { get; set; }
     }
 }
