@@ -22,9 +22,21 @@ namespace WebServer.Controllers
             _service = new CommentService(context);
         }
 
+        public double Average()
+        {
+            double sum = 0;
+            List<Comment> comments = _service.GetAll();
+            foreach (var comment in comments)
+            {
+                sum += comment.Rating;
+            }
+            return comments.Count != 0 ? Math.Round(sum / comments.Count, 2) : 0;
+        }
+
         // GET: Comments
         public IActionResult Index()
         {
+            ViewBag.RatingAvg = Average();
             return View(_service.GetAll());
         }
 

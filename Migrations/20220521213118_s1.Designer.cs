@@ -9,11 +9,11 @@ using WebServer.Data;
 
 #nullable disable
 
-namespace WebServer.Migrations
+namespace stam.Migrations
 {
     [DbContext(typeof(WebServerContext))]
-    [Migration("20220521205512_init2")]
-    partial class init2
+    [Migration("20220521213118_s1")]
+    partial class s1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,7 +24,7 @@ namespace WebServer.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("WebServer.Models.Chat", b =>
+            modelBuilder.Entity("stam.Models.Chat", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -42,7 +42,7 @@ namespace WebServer.Migrations
                     b.ToTable("Chat");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Comment", b =>
+            modelBuilder.Entity("stam.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -69,7 +69,7 @@ namespace WebServer.Migrations
                     b.ToTable("Comment");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Contact", b =>
+            modelBuilder.Entity("stam.Models.Contact", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,12 +81,15 @@ namespace WebServer.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Server")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -97,7 +100,7 @@ namespace WebServer.Migrations
                     b.ToTable("Contact");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Message", b =>
+            modelBuilder.Entity("stam.Models.Message", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -116,12 +119,15 @@ namespace WebServer.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("To")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("from")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -131,7 +137,7 @@ namespace WebServer.Migrations
                     b.ToTable("Message");
                 });
 
-            modelBuilder.Entity("WebServer.Models.User", b =>
+            modelBuilder.Entity("stam.Models.User", b =>
                 {
                     b.Property<string>("Username")
                         .HasColumnType("nvarchar(450)");
@@ -152,27 +158,27 @@ namespace WebServer.Migrations
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Chat", b =>
+            modelBuilder.Entity("stam.Models.Chat", b =>
                 {
-                    b.HasOne("WebServer.Models.User", null)
+                    b.HasOne("stam.Models.User", null)
                         .WithMany("Chats")
                         .HasForeignKey("Username");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Contact", b =>
+            modelBuilder.Entity("stam.Models.Contact", b =>
                 {
-                    b.HasOne("WebServer.Models.Chat", "Chat")
+                    b.HasOne("stam.Models.Chat", "Chat")
                         .WithOne("Contact")
-                        .HasForeignKey("WebServer.Models.Contact", "ChatId")
+                        .HasForeignKey("stam.Models.Contact", "ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Chat");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Message", b =>
+            modelBuilder.Entity("stam.Models.Message", b =>
                 {
-                    b.HasOne("WebServer.Models.Chat", "Chat")
+                    b.HasOne("stam.Models.Chat", "Chat")
                         .WithMany("Messages")
                         .HasForeignKey("ChatID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -181,14 +187,15 @@ namespace WebServer.Migrations
                     b.Navigation("Chat");
                 });
 
-            modelBuilder.Entity("WebServer.Models.Chat", b =>
+            modelBuilder.Entity("stam.Models.Chat", b =>
                 {
-                    b.Navigation("Contact");
+                    b.Navigation("Contact")
+                        .IsRequired();
 
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("WebServer.Models.User", b =>
+            modelBuilder.Entity("stam.Models.User", b =>
                 {
                     b.Navigation("Chats");
                 });
