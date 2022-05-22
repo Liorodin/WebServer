@@ -10,6 +10,7 @@ using WebServer.Data;
 using WebServer.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using WebServer.Controllers;
 
 namespace WebServer.Controllers
 {
@@ -32,57 +33,41 @@ namespace WebServer.Controllers
             public string? Server { get; set; }
         }
 
-        private User GetUser(HttpContext context)
+        private User GetUser(HttpContext context, string username)
         {
-            var user = context.User.Identity as ClaimsIdentity;
-            if (user.IsAuthenticated == false) return null;
-            string username = user.Claims.FirstOrDefault(x => x.Type == "Username").Value;
             return _context.User.Include(x => x.Chats).FirstOrDefault(m => m.Username == username);
         }
 
         [HttpPost]
         public async Task<IActionResult> PostInvitations([Bind("From, To, Server")] InvitationRequest request)
         {
+            //UsersController u = new UsersController(_context, configuration);
+            User sender = GetUser(HttpContext, request.From);
+            //User reciever = GetUser(HttpContext, request.To);
 
-            //GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-
-            //var invitation = new Invitation
-            //{
-            //    InvitedUserEmailAddress = "admin@fabrikam.com",
-            //    InviteRedirectUrl = "https://myapp.contoso.com"
-            //};
-
-            //await graphClient.Invitations
-            //    .Request()
-            //    .AddAsync(invitation);
-
-
-            //User sender = GetUser(HttpContext);
-            //User reciever = GetUser(HttpContext);
-
+            //
             //await _context.Chat.Include(x => x.Contact).ToListAsync();
             //var chats = sender.Chats.ToList();
-            ////sender.Chats.Add();
+            //sender.Chats.Add();
 
-            //Contact findContact = await _context.Contact.FirstOrDefaultAsync(x => x.Username == id);
-            //if (findContact == null) return NotFound();
-            //Chat? findChat = await _context.Chat.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == findContact.ChatId);
-            //if (sender.Chats.Contains(findChat))
-            //{
-            //    Message message = new Message();
-            //    message.from = request.From;
-            //    message.To = request.To; 
-            //    findChat.Messages.Add(message);
-            //    await _context.SaveChangesAsync();
-            //    return Created("", request);
-            //}
-
-            ////Chat newChat = new();
-
-
-            return NotFound();
+            foreach (Chat chat in sender.Chats)
+            {
+                Chat findChat = await _context.Chat.Include(x => x.Contact).FirstOrDefaultAsync(y => y.Id == chat.Id);
+                if (findChat.Contact.Username == request.To) return BadRequest();
+            }
+            Chat newChat = new();
+            Contact newContact = new();
+            newContact.Username = request.To;
+            newContact.Name = request.To;
+            newContact.Server = request.Server;
+            newContact.Chat = newChat;
+            newChat.Messages = new List<Message>();
+            newChat.Contact = newContact;
+            sender.Chats.Add(newChat);
+            _context.Add(newChat);
+            await _context.SaveChangesAsync();
+            return Created("", request);
         }
-
     }
 }
 
