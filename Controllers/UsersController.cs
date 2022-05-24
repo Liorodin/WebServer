@@ -33,6 +33,11 @@ namespace WebServer.Controllers
             public string Password { get; set; }
         }
 
+        private User GetUser(HttpContext context, string username)
+        {
+            return _context.User.Include(x => x.Chats).FirstOrDefault(m => m.Username == username);
+        }
+
         [HttpDelete]
         public async Task<IActionResult> DeleteUser(string id)
         {

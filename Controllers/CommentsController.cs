@@ -22,29 +22,23 @@ namespace WebServer.Controllers
             _service = new CommentService(context);
         }
 
+        public double Average()
+        {
+            double sum = 0;
+            List<Comment> comments = _service.GetAll();
+            foreach (var comment in comments)
+            {
+                sum += comment.Rating;
+            }
+            return comments.Count != 0 ? Math.Round(sum / comments.Count, 2) : 0;
+        }
+
         // GET: Comments
         public IActionResult Index()
         {
+            ViewBag.RatingAvg = Average();
             return View(_service.GetAll());
         }
-
-        //[HttpPost]
-
-        //public async Task<IActionResult> Search()
-        //{
-        //    List<Comment> comments = await _context.Comment.ToListAsync();
-        //    comments.Sort((a, b) => -DateTime.Compare(a.Time, b.Time));
-        //    return View(comments);
-        //}
-
-        //public async Task<IActionResult> Search(string query)
-        //{
-        //    var q = from    comment in _context.Comment
-        //            where comment.Name.Contains(query) ||
-        //            comment.Feedback.Contains(query)
-        //            select comment;
-        //    return View(await q.ToListAsync());
-        //}
 
         public IActionResult Search(string query)
         {
