@@ -23,8 +23,10 @@ namespace WebServer.Services.Comments
         public void Edit(Comment comment)
         {
             if (Get(comment.Id) == null) return;
-            comment.Time = DateTime.Now.ToString();
-            _context.Update(comment);        
+            Comment newComment = Get(comment.Id);
+            newComment.Rating = comment.Rating;
+            newComment.Time = DateTime.Now.ToString();
+            _context.Update(newComment);        
             _context.SaveChanges();
             return;
         }
@@ -39,7 +41,6 @@ namespace WebServer.Services.Comments
         public List<Comment> GetAll()
         {
             return _context.Comment != null ? _context.Comment.ToList() : new List<Comment>();
-
         }
 
         public void Create(Comment comment)
