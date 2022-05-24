@@ -38,29 +38,30 @@ namespace WebServer.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostInvitations([Bind("From, To, Server")] TransferRequest request)
+        public async Task<IActionResult> PostTransfer([Bind("From, To, Content")] TransferRequest request)
         {
-            User sender = GetUser(HttpContext, request.From);
-
-            await _context.Chat.Include(x => x.Contact).ToListAsync();
-            var chats = sender.Chats.ToList();
-
-            Contact findContact = await _context.Contact.FirstOrDefaultAsync(x => x.Username == request.To);
-            if (findContact == null) return NotFound();
-            Chat? findChat = await _context.Chat.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == findContact.ChatId);
-            if (sender.Chats.Contains(findChat))
+            //User sender = GetUser(HttpContext, request.From);
+            User reciever = _context.User.Include(x => x.Chats).FirstOrDefault(y => y.Username == request.To);
+            if (reciever == null) return BadRequest();
+            Chat findChat = null;
+            foreach (Chat chat in reciever.Chats)
             {
-                Message message = new Message();
-                message.Content = request.Content;
-                message.from = request.From;
-                message.To = request.To;
-                message.Time = DateTime.Now;
-                message.Type = "text";
-                findChat.Messages.Add(message);
-                await _context.SaveChangesAsync();
-                return Created("", request);
+                Chat currentChat = await _context.Chat.Include(x => x.Contact).FirstOrDefaultAsync(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == request.From) findChat = currentChat;
             }
-            return NotFound();
+            if (findChat == null) return BadRequest();
+            Message message = new Message();
+            message.Content = request.Content;
+            message.from = request.From;
+            message.To = request.To;
+            message.Time = DateTime.Now;
+            message.Type = "text";
+            message.ChatID = findChat.Id;
+            message.Chat = findChat;
+            _context.Message.Add(message);
+            findChat.Messages.Add(message);
+            await _context.SaveChangesAsync();
+            return Created("", request);
         }
     }
 }

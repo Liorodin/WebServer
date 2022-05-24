@@ -33,37 +33,26 @@ namespace WebServer.Controllers
             public string? Server { get; set; }
         }
 
-        private User GetUser(HttpContext context, string username)
-        {
-            return _context.User.Include(x => x.Chats).FirstOrDefault(m => m.Username == username);
-        }
-
         [HttpPost]
         public async Task<IActionResult> PostInvitations([Bind("From, To, Server")] InvitationRequest request)
         {
-            //UsersController u = new UsersController(_context, configuration);
-            User sender = GetUser(HttpContext, request.From);
-            //User reciever = GetUser(HttpContext, request.To);
+            User reciever = _context.User.Include(x => x.Chats).FirstOrDefault(y => y.Username == request.To);
+            if (reciever == null) return BadRequest();
 
-            //
-            //await _context.Chat.Include(x => x.Contact).ToListAsync();
-            //var chats = sender.Chats.ToList();
-            //sender.Chats.Add();
-
-            foreach (Chat chat in sender.Chats)
+            foreach (Chat chat in reciever.Chats)
             {
                 Chat findChat = await _context.Chat.Include(x => x.Contact).FirstOrDefaultAsync(y => y.Id == chat.Id);
-                if (findChat.Contact.Username == request.To) return BadRequest();
+                if (findChat.Contact.Username == request.From) return BadRequest();
             }
             Chat newChat = new();
             Contact newContact = new();
-            newContact.Username = request.To;
-            newContact.Name = request.To;
+            newContact.Username = request.From;
+            newContact.Name = request.From;
             newContact.Server = request.Server;
             newContact.Chat = newChat;
             newChat.Messages = new List<Message>();
             newChat.Contact = newContact;
-            sender.Chats.Add(newChat);
+            reciever.Chats.Add(newChat);
             _context.Add(newChat);
             await _context.SaveChangesAsync();
             return Created("", request);
