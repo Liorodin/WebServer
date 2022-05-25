@@ -13,7 +13,6 @@ using System.Security.Claims;
 
 namespace WebServer.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TransferController : Controller
@@ -32,15 +31,14 @@ namespace WebServer.Controllers
             public string? Content { get; set; }
         }
 
-        private User GetUser(HttpContext context, string username)
-        {
-            return _context.User.Include(x => x.Chats).FirstOrDefault(m => m.Username == username);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> PostInvitations([Bind("From, To, Server")] TransferRequest request)
+        public async Task<IActionResult> PostTransfer([Bind("From, To, Content")] TransferRequest request)
         {
-            User sender = GetUser(HttpContext, request.From);
+            User sender = _context.User.Include(x => x.Chats).Where(u => u.Username == request.From).FirstOrDefault();
+            if (sender == null)
+            {
+                return BadRequest();
+            }
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = sender.Chats.ToList();

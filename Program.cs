@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebServer.Data;
+using WebServer.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<WebServerContext>(options =>
@@ -11,6 +13,7 @@ builder.Services.AddDbContext<WebServerContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(option =>
 {
@@ -36,9 +39,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Allow All", builder =>
     {
         builder
-          .AllowAnyOrigin()
+        //the host of the react
+          .WithOrigins("Http://localhost:3000")
            .AllowAnyMethod()
-           .AllowAnyHeader();
+           .AllowAnyHeader().AllowCredentials();
 
     });
 });
@@ -64,5 +68,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Comments}/{action=Index}/{id?}");
 
-
+app.MapHub<ChatHub>("/hub/chathub");
 app.Run();

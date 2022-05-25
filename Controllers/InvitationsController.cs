@@ -14,7 +14,6 @@ using WebServer.Controllers;
 
 namespace WebServer.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class InvitationsController : Controller
@@ -33,32 +32,18 @@ namespace WebServer.Controllers
             public string? Server { get; set; }
         }
 
-        private User GetUser(HttpContext context, string username)
-        {
-            return _context.User.Include(x => x.Chats).FirstOrDefault(m => m.Username == username);
-        }
-
         [HttpPost]
         public async Task<IActionResult> PostInvitations([Bind("From, To, Server")] InvitationRequest request)
         {
-            //UsersController u = new UsersController(_context, configuration);
-            User sender = GetUser(HttpContext, request.From);
-            //User reciever = GetUser(HttpContext, request.To);
-
-            //
-            //await _context.Chat.Include(x => x.Contact).ToListAsync();
-            //var chats = sender.Chats.ToList();
-            //sender.Chats.Add();
-
-            foreach (Chat chat in sender.Chats)
+            User sender = _context.User.Include(x => x.Chats).Where(u => u.Username == request.To).FirstOrDefault();
+            if (sender == null)
             {
-                Chat findChat = await _context.Chat.Include(x => x.Contact).FirstOrDefaultAsync(y => y.Id == chat.Id);
-                if (findChat.Contact.Username == request.To) return BadRequest();
+                return BadRequest();
             }
             Chat newChat = new();
             Contact newContact = new();
-            newContact.Username = request.To;
-            newContact.Name = request.To;
+            newContact.Username = request.From;
+            newContact.Name = request.From;
             newContact.Server = request.Server;
             newContact.Chat = newChat;
             newChat.Messages = new List<Message>();
