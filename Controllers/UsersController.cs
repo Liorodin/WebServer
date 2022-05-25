@@ -66,11 +66,6 @@ namespace WebServer.Controllers
             return Ok();
         }
 
-        private bool UserExists(string id)
-        {
-            return (_context.User?.Any(e => e.Username == id)).GetValueOrDefault();
-        }
-
         [AllowAnonymous]
         [HttpPost("Register")]
         public async Task<IActionResult> Register([Bind("Username,Nickname,Password,Picture")] User newUser)
@@ -89,10 +84,7 @@ namespace WebServer.Controllers
         [HttpPost("Login")]
         public IActionResult Login([Bind("Username,Password")] LoginUser user)
         {
-            if (_context.User == null)
-            {
-                return Problem("Entity set 'WebServerContext.User' is null.");
-            }
+            if (_context.User == null) return NotFound();
 
             var q = _context.User.Where(e => e.Username == user.Username && e.Password == user.Password);
             if (q.Any())
@@ -110,14 +102,22 @@ namespace WebServer.Controllers
                     _configuration["JWTParams:Issuer"],
                     _configuration["JWTParams:Audience"],
                     Claims,
-                    expires: DateTime.Now.AddMinutes(20),
+                    expires: DateTime.Now.AddMinutes(50),
                     signingCredentials: mac);
                 return Ok(new JwtSecurityTokenHandler().WriteToken(token));
-                //HttpContext.Session.SetString("username", q.First().Username);
-                //return Json(HttpContext.Session.Id);
             }
             ViewData["Error"] = "Username and/or password are incorrect.";
             return NotFound();
+        }
+
+        [HttpPost("User")]
+        public IActionResult Get(string username)
+        {
+            if (_context.User == null) return NotFound();
+            User user = _context.User.Find(username);
+            if (user ==null) return NotFound();
+            user.Password = null;
+            return Json(user);                  
         }
     }
 }
