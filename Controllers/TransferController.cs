@@ -13,7 +13,6 @@ using System.Security.Claims;
 
 namespace WebServer.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TransferController : Controller
@@ -30,11 +29,6 @@ namespace WebServer.Controllers
             public string? From { get; set; }
             public string? To { get; set; }
             public string? Content { get; set; }
-        }
-
-        private User GetUser(HttpContext context, string username)
-        {
-            return _context.User.Include(x => x.Chats).FirstOrDefault(m => m.Username == username);
         }
 
         [HttpPost]

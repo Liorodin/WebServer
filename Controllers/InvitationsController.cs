@@ -14,7 +14,6 @@ using WebServer.Controllers;
 
 namespace WebServer.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class InvitationsController : Controller
