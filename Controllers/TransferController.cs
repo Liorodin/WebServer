@@ -40,8 +40,12 @@ namespace WebServer.Controllers
             Chat findChat = null;
             foreach (Chat chat in reciever.Chats)
             {
-                Chat currentChat = await _context.Chat.Include(x => x.Contact).FirstOrDefaultAsync(y => y.Id == chat.Id);
-                if (currentChat.Contact.Username == request.From) findChat = currentChat;
+                Chat currentChat = await _context.Chat.Include(x => x.Contact).Include(z => z.Messages).FirstOrDefaultAsync(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == request.From)
+                {
+                    findChat = currentChat;
+                    break;
+                }
             }
             if (findChat == null) return BadRequest();
             Message message = new Message();
