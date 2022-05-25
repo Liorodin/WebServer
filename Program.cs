@@ -68,5 +68,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Comments}/{action=Index}/{id?}");
 
-app.MapHub<ChatHub>("/hub/chathub");
+app.MapHub<ChatHub>("/hubs/chathub");
 app.Run();
