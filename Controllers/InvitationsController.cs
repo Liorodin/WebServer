@@ -35,10 +35,13 @@ namespace WebServer.Controllers
         [HttpPost]
         public async Task<IActionResult> PostInvitations([Bind("From, To, Server")] InvitationRequest request)
         {
-            User sender = _context.User.Include(x => x.Chats).Where(u => u.Username == request.To).FirstOrDefault();
-            if (sender == null)
+            User reciever = _context.User.Include(x => x.Chats).FirstOrDefault(y => y.Username == request.To);
+            if (reciever == null) return BadRequest();
+
+            foreach (Chat chat in reciever.Chats)
             {
-                return BadRequest();
+                Chat findChat = await _context.Chat.Include(x => x.Contact).FirstOrDefaultAsync(y => y.Id == chat.Id);
+                if (findChat.Contact.Username == request.From) return BadRequest();
             }
             Chat newChat = new();
             Contact newContact = new();
@@ -48,7 +51,7 @@ namespace WebServer.Controllers
             newContact.Chat = newChat;
             newChat.Messages = new List<Message>();
             newChat.Contact = newContact;
-            sender.Chats.Add(newChat);
+            reciever.Chats.Add(newChat);
             _context.Add(newChat);
             await _context.SaveChangesAsync();
             return Created("", request);

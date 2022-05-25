@@ -162,6 +162,8 @@ namespace WebServer.Controllers
             if (loggedUser.Chats.Contains(findChat))
             {
                 loggedUser.Chats.Remove(findChat);
+                _context.Contact.Remove(findContact);
+                _context.Remove(findChat);
                 await _context.SaveChangesAsync();
                 return NoContent();
             }
