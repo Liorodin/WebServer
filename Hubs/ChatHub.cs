@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Chatty.Api.Hubs.Clients;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
-using static WebServer.Controllers.ContactsController;
 
-internal class ChatHub : Hub
+internal class ChatHub : Hub<IChatClient>
 {
-    public async Task SendMessage(TempMessage message)
+
+    public async Task SendMessage(ChatMessage message)
     {
-        await Clients.All.SendAsync("ReceiveMessage", message);
+        await Clients.All.ReceiveMessage(message);
     }
 }
