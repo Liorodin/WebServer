@@ -1,25 +1,18 @@
-# Shirin and Leonardo's Webserver
+# our Webserver
 Shirin Bazis 211492970\
 Leonardo Rodin 207377151\
 Anastasia Khizgiyaev 208478453
 
 ## Instructions:
 
-In the project directory, you should:
+### `1. Update database`
+- In order to update the client with new information, we would need to update the database.
+- In the upper toolbox, press View -> Other Windows -> Packge Manager Console.
+- Inside the console, enter "Uptade-Database". 
+- After the process has finished and the consloe wrote "Done.", run the WebServer. 
+- Our chat application will be opened in the browser.
 
-### `1. Run npm install`
-
-
-### `2. Run npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-
-### `3. Register`
+### `2. Register`
 
 Register with a new username and password.
 
