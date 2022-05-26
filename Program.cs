@@ -31,7 +31,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 builder.Services.AddSession(option =>
 {
-    option.IdleTimeout = TimeSpan.FromMinutes(15);
+    option.IdleTimeout = TimeSpan.FromMinutes(50);
 });
 
 builder.Services.AddCors(options =>
@@ -43,7 +43,6 @@ builder.Services.AddCors(options =>
           .WithOrigins("Http://localhost:3000")
            .AllowAnyMethod()
            .AllowAnyHeader().AllowCredentials();
-
     });
 });
 
@@ -61,8 +60,10 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseStaticFiles();
 app.UseRouting();
+
 app.UseSession();
 app.UseAuthorization();
+
 
 app.MapControllerRoute(
     name: "default",

@@ -68,18 +68,18 @@ namespace WebServer.Controllers
             public bool Sent { get; set; }
         }
 
-        private User GetLoggedUser(HttpContext context)
+        private async Task<User> GetLoggedUser(HttpContext context)
         {
             var user = context.User.Identity as ClaimsIdentity;
             if (user.IsAuthenticated == false) return null;
             string username = user.Claims.FirstOrDefault(x => x.Type == "Username").Value;
-            return _context.User.Include(x => x.Chats).FirstOrDefault(m => m.Username == username);
+            return await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == username);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetContacts()
         {
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
             if (loggedUser.Chats.Count == 0) return Json("[]");
             List<GetContactResponse> list = new List<GetContactResponse>();
             foreach (Chat chat in loggedUser.Chats)
@@ -87,6 +87,7 @@ namespace WebServer.Controllers
                 Chat? findChat = await _context.Chat.Include(x => x.Contact).Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == chat.Id);
                 Contact contact = findChat.Contact;
                 GetContactResponse con = new GetContactResponse(contact.Username, contact.Name, contact.Server);
+
                 if (findChat.Messages.Count() > 0)
                 {
                     con.Last = findChat.Messages.Last().Content;
@@ -100,14 +101,10 @@ namespace WebServer.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetContact(string id)
         {
-            User loggedUser = GetLoggedUser(HttpContext);
-
+            User loggedUser = await GetLoggedUser(HttpContext);
             await _context.Chat.Include(x => x.Contact).ToListAsync();
-
             var chats = loggedUser.Chats.ToList();
-
             List<GetContactResponse> list = new List<GetContactResponse>();
-
             Contact findContact = await _context.Contact.FirstOrDefaultAsync(x => x.Username == id);
             if (findContact == null) return NotFound();
             Chat? findChat = await _context.Chat.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == findContact.ChatId);
@@ -127,7 +124,7 @@ namespace WebServer.Controllers
         [HttpPost]
         public async Task<IActionResult> AddContact([Bind("Id,Name,Server")] AddContactResponse contact)
         {
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
             foreach (Chat chat in loggedUser.Chats)
             {
                 Chat findChat = await _context.Chat.Include(x => x.Contact).FirstOrDefaultAsync(y => y.Id == chat.Id);
@@ -150,7 +147,7 @@ namespace WebServer.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteContact(string id)
         {
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
 
@@ -171,19 +168,20 @@ namespace WebServer.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditContact([Bind("Id,Name,Server")] AddContactResponse contact ,string id)
+        public async Task<IActionResult> EditContact([Bind("Id,Name,Server")] AddContactResponse contact, string id)
         {
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
 
             Contact findContact = await _context.Contact.FirstOrDefaultAsync(x => x.Username == id);
-            if (findContact == null || findContact.Server!=contact.Server) return NotFound();
+            if (findContact == null || findContact.Server != contact.Server) return NotFound();
             Chat? findChat = await _context.Chat.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == findContact.ChatId);
             if (loggedUser.Chats.Contains(findChat))
             {
                 findContact.Name = contact.Name;
+                //nastia add here server ------------------------
                 await _context.SaveChangesAsync();
                 return NoContent();
             }
@@ -193,23 +191,24 @@ namespace WebServer.Controllers
         [HttpGet("{id}/messages")]
         public async Task<IActionResult> GetMessages(string id)
         {
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
 
-            Contact findContact = await _context.Contact.FirstOrDefaultAsync(x => x.Username == id);
-            if (findContact == null) return NotFound();
-            Chat? findChat = await _context.Chat.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == findContact.ChatId);
-            if (loggedUser.Chats.Contains(findChat))
+            foreach (var chat in chats)
             {
-                List<MessageResponse> messages = new();
-                foreach (var message in findChat.Messages)
+                Chat currentChat = await _context.Chat.Include(x => x.Contact).Include(z => z.Messages).FirstOrDefaultAsync(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == id)
                 {
-                    MessageResponse messageResponse = new MessageResponse(message.Id, message.Content, message.Time, message.from == loggedUser.Username);
-                    messages.Add(messageResponse);
+                    List<MessageResponse> messages = new();
+                    foreach (var message in currentChat.Messages)
+                    {
+                        MessageResponse messageResponse = new MessageResponse(message.Id, message.Content, message.Time, message.from == loggedUser.Username);
+                        messages.Add(messageResponse);
+                    }
+                    return Json(messages);
                 }
-                return Json(messages);
             }
             return NotFound();
         }
@@ -217,21 +216,21 @@ namespace WebServer.Controllers
         [HttpGet("{id}/messages/{messageId}")]
         public async Task<IActionResult> GetMessage(string id, int messageId)
         {
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
-
-            Contact findContact = await _context.Contact.FirstOrDefaultAsync(x => x.Username == id);
-            if (findContact == null) return NotFound();
-            Chat? findChat = await _context.Chat.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == findContact.ChatId);
-            if (loggedUser.Chats.Contains(findChat))
+            foreach (var chat in chats)
             {
-                Message findMessage = await _context.Message.FindAsync(messageId);
-                if (findMessage == null) return NotFound();
-                if (!(findChat.Messages.Contains(findMessage))) return NotFound();
-                MessageResponse messageResponse = new MessageResponse(findMessage.Id, findMessage.Content, findMessage.Time, findMessage.from == loggedUser.Username);
-                return Json(messageResponse);
+                Chat currentChat = await _context.Chat.Include(x => x.Contact).Include(z => z.Messages).FirstOrDefaultAsync(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == id)
+                {
+                    Message findMessage = await _context.Message.FindAsync(messageId);
+                    if (findMessage == null) return NotFound();
+                    if (!(currentChat.Messages.Contains(findMessage))) return NotFound();
+                    MessageResponse messageResponse = new MessageResponse(findMessage.Id, findMessage.Content, findMessage.Time, findMessage.from == loggedUser.Username);
+                    return Json(messageResponse);
+                }
             }
             return NotFound();
         }
@@ -239,25 +238,25 @@ namespace WebServer.Controllers
         [HttpPost("{id}/messages")]
         public async Task<IActionResult> PostMessage([Bind("Content")] TempMessage tempMessage, string id)
         {
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
-
-            Contact findContact = await _context.Contact.FirstOrDefaultAsync(x => x.Username == id);
-            if (findContact == null) return NotFound();
-            Chat? findChat = await _context.Chat.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == findContact.ChatId);
-            if (loggedUser.Chats.Contains(findChat))
+            foreach (var chat in chats)
             {
-                Message message = new Message();
-                message.Content = tempMessage.Content;
-                message.from = loggedUser.Username;
-                message.To = id;
-                message.Time = DateTime.Now;
-                message.Type = "text";
-                findChat.Messages.Add(message);
-                await _context.SaveChangesAsync();
-                return Created("", tempMessage);
+                Chat currentChat = await _context.Chat.Include(x => x.Contact).Include(z => z.Messages).FirstOrDefaultAsync(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == id)
+                {
+                    Message message = new Message();
+                    message.Content = tempMessage.Content;
+                    message.from = loggedUser.Username;
+                    message.To = id;
+                    message.Time = DateTime.Now;
+                    message.Type = "text";
+                    currentChat.Messages.Add(message);
+                    await _context.SaveChangesAsync();
+                    return Created("", tempMessage);
+                }
             }
             return NotFound();
         }
@@ -265,24 +264,22 @@ namespace WebServer.Controllers
         [HttpPut("{id}/messages/{messageId}")]
         public async Task<IActionResult> EditMessage([Bind("content")] TempMessage message, string id, int messageId)
         {
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
-
-            List<GetContactResponse> list = new List<GetContactResponse>();
-
-            Contact findContact = await _context.Contact.FirstOrDefaultAsync(x => x.Username == id);
-            if (findContact == null) return NotFound();
-            Chat? findChat = await _context.Chat.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == findContact.ChatId);
-            if (loggedUser.Chats.Contains(findChat))
+            foreach (var chat in chats)
             {
-                Message findMessage = await _context.Message.FindAsync(messageId);
-                if(findMessage == null) return NotFound();
-                if(!(findChat.Messages.Contains(findMessage))) return NotFound();
-                findMessage.Content = message.Content;
-                await _context.SaveChangesAsync();
-                return NoContent();
+                Chat currentChat = await _context.Chat.Include(x => x.Contact).Include(z => z.Messages).FirstOrDefaultAsync(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == id)
+                {
+                    Message findMessage = await _context.Message.FindAsync(messageId);
+                    if (findMessage == null) return NotFound();
+                    if (!(currentChat.Messages.Contains(findMessage))) return NotFound();
+                    findMessage.Content = message.Content;
+                    await _context.SaveChangesAsync();
+                    return NoContent();
+                }
             }
             return NotFound();
         }
@@ -290,24 +287,23 @@ namespace WebServer.Controllers
         [HttpDelete("{id}/messages/{messageId}")]
         public async Task<IActionResult> DeleteMessage(string id, int messageId)
         {
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
 
             await _context.Chat.Include(x => x.Contact).ToListAsync();
             var chats = loggedUser.Chats.ToList();
 
-            List<GetContactResponse> list = new List<GetContactResponse>();
-
-            Contact findContact = await _context.Contact.FirstOrDefaultAsync(x => x.Username == id);
-            if (findContact == null) return NotFound();
-            Chat? findChat = await _context.Chat.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == findContact.ChatId);
-            if (loggedUser.Chats.Contains(findChat))
+            foreach (var chat in chats)
             {
-                Message findMessage = await _context.Message.FindAsync(messageId);
-                if (findMessage == null) return NotFound();
-                if (!(findChat.Messages.Contains(findMessage))) return NotFound();
-                findChat.Messages.Remove(findMessage);
-                await _context.SaveChangesAsync();
-                return NoContent();
+                Chat currentChat = await _context.Chat.Include(x => x.Contact).Include(z => z.Messages).FirstOrDefaultAsync(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == id)
+                {
+                    Message findMessage = await _context.Message.FindAsync(messageId);
+                    if (findMessage == null) return NotFound();
+                    if (!(currentChat.Messages.Contains(findMessage))) return NotFound();
+                    currentChat.Messages.Remove(findMessage);
+                    await _context.SaveChangesAsync();
+                    return NoContent();
+                }
             }
             return NotFound();
         }
