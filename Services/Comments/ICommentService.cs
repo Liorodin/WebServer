@@ -6,7 +6,7 @@ namespace WebServer.Services.Comments
     {
         public List<Comment> GetAll();
 
-        public Comment Get(int id);
+        public  Comment Get(int id);
 
         public void Create(Comment comment);
 

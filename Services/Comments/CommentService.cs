@@ -1,4 +1,5 @@
-﻿using WebServer.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using WebServer.Data;
 using WebServer.Models;
 
 namespace WebServer.Services.Comments
@@ -40,7 +41,7 @@ namespace WebServer.Services.Comments
 
         public List<Comment> GetAll()
         {
-            return _context.Comment != null ? _context.Comment.ToList() : new List<Comment>();
+            return _context.Comment != null ?  _context.Comment.ToList() : new List<Comment>();
         }
 
         public void Create(Comment comment)
