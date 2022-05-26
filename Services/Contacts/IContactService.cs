@@ -62,15 +62,15 @@ namespace WebServer.Services.Contacts
 
         public int Delete(User current, string id);
 
-        //public Task<IActionResult> GetMessages(string id);
+        public Task<List<MessageResponse>> GetMessages(User user, string id);
 
-        //public Task<IActionResult> GetMessage(string id, int messageId);
+        public Task<MessageResponse> GetMessage(User user, string id, int messageId);
 
-        //public Task<IActionResult> PostMessage(TempMessage tempMessage, string id);
+        public int PostMessage(User current, TempMessage tempMessage, string id);
 
-        //public Task<IActionResult> EditMessage(TempMessage message, string id, int messageId);
+        public int EditMessage(User current, TempMessage message, string id, int messageId);
 
-        //public Task<IActionResult> DeleteMessage(string id, int messageId);
+        public int DeleteMessage(User current, string id, int messageId);
 
     }
 }

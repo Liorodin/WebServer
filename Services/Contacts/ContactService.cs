@@ -71,51 +71,37 @@ namespace WebServer.Services.Contacts
             return list;
         }
 
-        public async Task<GetContactResponse> Get(User current, string id)
+        public async Task<GetContactResponse> Get(User current, string id) 
         {
-
-            var chats = current.Chats.ToList();
-
-            List<GetContactResponse> list = new List<GetContactResponse>();
-
-            Contact findContact = await _context.Contact.FirstOrDefaultAsync(x => x.Username == id);
-            if (findContact == null) return null;
-            Chat? findChat = await _context.Chat.Include(x => x.Messages).Include(x => x.Contact).FirstOrDefaultAsync(x => x.Id == findContact.ChatId);
-            if (current.Chats.Contains(findChat))
-            {
-                GetContactResponse con = new GetContactResponse(findContact.Username, findContact.Name, findContact.Server);
-                if (findChat != null && findChat.Messages.Count() > 0)
-                {
-                    con.Last = findChat.Messages.Last().Content;
-                    con.Lastdate = findChat.Messages.Last().Time;
+            foreach (Chat chat in current.Chats.ToList()) 
+            { 
+                Chat findChat = await _context.Chat.Include(x => x.Messages).Include(x => x.Contact).FirstOrDefaultAsync(x => x.Id == chat.Id);
+                if (findChat.Contact.Username == id) 
+                { 
+                    GetContactResponse con = new GetContactResponse(findChat.Contact.Username, findChat.Contact.Name, findChat.Contact.Server);
+                    if (findChat.Messages.Count > 0) 
+                    {
+                        con.Last = findChat.Messages.Last().Content;
+                        con.Lastdate = findChat.Messages.Last().Time; 
+                    } return con; 
                 }
-                return con;
-            }
+            } 
             return null;
         }
 
 
         // delete a contact
-        public int Delete(User current, string messageId)
+        public int Delete(User current, string id)
         {
-
-            _context.Chat.Include(x => x.Contact).ToListAsync();
-            var chats = current.Chats.ToList();
-
-            List<GetContactResponse> list = new List<GetContactResponse>();
-
-            Contact findContact = _context.Contact.FirstOrDefault(x => x.Username == messageId);
-
-            if (findContact == null) return 0;
-            Chat? findChat = _context.Chat.Include(x => x.Messages).FirstOrDefault(x => x.Id == findContact.ChatId);
-            if (current.Chats.Contains(findChat))
+            foreach (Chat chat in current.Chats.ToList())
             {
-                Message findMessage = _context.Message.Find(messageId);
-                if (findMessage == null) return 0;
-                if (!(findChat.Messages.Contains(findMessage))) return 0;
-                findChat.Messages.Remove(findMessage);
-                _context.SaveChanges();
-                return 0;
+                Chat findChat = _context.Chat.Include(x => x.Messages).Include(x => x.Contact).FirstOrDefault(x => x.Id == chat.Id);
+                if (findChat.Contact.Username == id)
+                {
+                    current.Chats.Remove(findChat);
+                    _context.SaveChanges();
+                    return 1;
+                }
             }
             return 0;
         }
@@ -138,111 +124,113 @@ namespace WebServer.Services.Contacts
             current.Chats.Add(newChat);
             _context.Add(newChat);
             _context.Add(newContact);
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
             return 1; 
         }
 
         public int Edit(User current, Contacts.AddContactResponse contact, string id)
         {
-            _context.Chat.Include(x => x.Contact).ToList();
-            var chats = current.Chats.ToList();
-
-            Contact findContact = _context.Contact.FirstOrDefault(x => x.Username == id);
-            if (findContact == null || findContact.Server != contact.Server) return 0;
-            Chat? findChat = _context.Chat.Include(x => x.Messages).FirstOrDefault(x => x.Id == findContact.ChatId);
-            if (current.Chats.Contains(findChat))
+            foreach (Chat chat in current.Chats.ToList())
             {
-                findContact.Name = contact.Name;
-                _context.SaveChanges();
-                return 1;
+                Chat findChat = _context.Chat.Include(x => x.Messages).Include(x => x.Contact).FirstOrDefault(x => x.Id == chat.Id);
+                if (findChat.Contact.Username == id)
+                {
+                    findChat.Contact.Name = contact.Name;
+                    findChat.Contact.Server = contact.Server;
+                    _context.SaveChanges();
+                    return 1;
+                }
             }
             return 0;
         }
 
-        //public Task<int> Create(User current, ContactsController.AddContactResponse contact)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<List<Contacts.MessageResponse>> GetMessages(User current, string id)
+        {
+            var chats = current.Chats.ToList();
 
-        //public Task<int> Edit(User current, ContactsController.AddContactResponse contact, string id)
-        //{
-        //    throw new NotImplementedException();
-        //}
+            foreach (var chat in chats)
+            {
+                Chat currentChat = await _context.Chat.Include(x => x.Contact).Include(z => z.Messages).FirstOrDefaultAsync(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == id)
+                {
+                    List<Contacts.MessageResponse> messages = new();
+                    foreach (var message in currentChat.Messages)
+                    {
+                        Contacts.MessageResponse messageResponse = new Contacts.MessageResponse(message.Id, message.Content, message.Time, message.from == current.Username);
+                        messages.Add(messageResponse);
+                    }
+                    return messages;
+                }
+            }
+            return null;
+        }
+
+        public async Task<Contacts.MessageResponse> GetMessage(User current, string id, int messageId) {
 
 
+            List<Contacts.MessageResponse> msgs = await GetMessages(current, id);
+            return msgs.FirstOrDefault(x => x.Id == messageId);
+        }
 
+        public int PostMessage(User current, Contacts.TempMessage tempMessage, string id)
+        {
+            var chats = current.Chats.ToList();
+            foreach (var chat in chats)
+            {
+                Chat currentChat = _context.Chat.Include(x => x.Contact).Include(z => z.Messages).FirstOrDefault(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == id)
+                {
+                    Message message = new Message();
+                    message.Content = tempMessage.Content;
+                    message.from = current.Username;
+                    message.To = id;
+                    message.Time = DateTime.Now;
+                    message.Type = "text";
+                    currentChat.Messages.Add(message);
+                    _context.SaveChanges();
+                    return 1;
+                }
+            }
+            return 0;
+        }
 
+        public int EditMessage(User current, Contacts.TempMessage message, string id, int messageId)
+        {
+            var chats = current.Chats.ToList();
+            foreach (var chat in chats)
+            {
+                Chat currentChat = _context.Chat.Include(x => x.Contact).Include(z => z.Messages).FirstOrDefault(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == id)
+                {
+                    Message findMessage = _context.Message.Find(messageId);
+                    if (findMessage == null) return 0;
+                    if (!(currentChat.Messages.Contains(findMessage))) return 0;
+                    findMessage.Content = message.Content;
+                    _context.SaveChanges();
+                    return 1;
+                }
+            }
+            return 0;
+        }
 
+        public int DeleteMessage(User current, string id, int messageId)
+        {
+            var chats = current.Chats.ToList();
 
-
-
-
-        //////////////////////////////////////////////////////////////
-        //        private readonly WebServerContext _context;
-        //        private readonly HttpContext _httpContext;
-        //        public ContactService(WebServerContext context, HttpContext httpContext)
-        //        {
-        //            _context = context;
-        //            _httpContext = httpContext;
-        //        }
-        //        public void Delete(User current, int id)
-        //        {
-        //            if (_context.Comment == null) return;
-        //            Comment comment = Get(id);
-        //            if (comment == null) return;
-        //            _context.Remove(Get(id));
-        //            _context.SaveChanges();
-        //            return;
-        //        }
-
-        //        public void Edit(User current, Contact contact)
-        //        {
-        //            if (Get(comment.Id) == null) return;
-        //            comment.Time = DateTime.Now;
-        //            _context.Update(comment);
-        //            _context.SaveChanges();
-        //            return;
-        //        }
-
-        //        public Contact Get(User current, int id)
-        //        {
-        //            if (_context.Comment == null) return null;
-        //            Comment comment = _context.Comment.FirstOrDefault(x => x.Id == id);
-        //            return comment;
-        //        }
-
-        //        public List<Contact> GetAll(User current)
-        //        {
-        //            var user = HttpContext.User.Identity as ClaimsIdentity;
-        //            if (user.IsAuthenticated == false) return BadRequest();
-        //            string username = user.Claims.FirstOrDefault(x => x.Type == "Username").Value;
-
-        //            User? loggedUser = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync(m => m.Username == username);
-        //            if (loggedUser == null) return NotFound();
-        //            if (loggedUser.Chats.Count() == 0) return Json("[]");
-        //            List<GetContactResponse> list = new List<GetContactResponse>();
-        //            foreach (Chat chat in loggedUser.Chats)
-        //            {
-        //                Chat? findChat = await _context.Chat.Include(x => x.Contact).Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == chat.Id);
-        //                Contact contact = findChat.Contact;
-        //                GetContactResponse con = new GetContactResponse(contact.Username, contact.Name, contact.Server);
-        //                if (findChat.Messages.Count() > 0)
-        //                {
-        //                    con.Last = findChat.Messages.Last().Content;
-        //                    con.Lastdate = findChat.Messages.Last().Time;
-        //                }
-        //                list.Add(con);
-        //            }
-        //            return Json(list);
-        //        }
-
-        //        public void Create(User current, Contact contact)
-        //        {
-        //            if (Get(comment.Id) != null) return;
-        //            comment.Time = DateTime.Now;
-        //            _context.Add(comment);
-        //            _context.SaveChanges();
-        //            return;
-        //        }
+            foreach (var chat in chats)
+            {
+                Chat currentChat = _context.Chat.Include(x => x.Contact).Include(z => z.Messages).FirstOrDefault(y => y.Id == chat.Id);
+                if (currentChat.Contact.Username == id)
+                {
+                    Message findMessage = _context.Message.Find(messageId);
+                    if (findMessage == null) return 0;
+                    if (!(currentChat.Messages.Contains(findMessage))) return 0;
+                    currentChat.Messages.Remove(findMessage);
+                    _context.SaveChanges();
+                    return 1;
+                }
+            }
+            return 0;
+        }
     }
 }
