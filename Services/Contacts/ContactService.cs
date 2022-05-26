@@ -137,6 +137,7 @@ namespace WebServer.Services.Contacts
             newChat.Contact = newContact;
             current.Chats.Add(newChat);
             _context.Add(newChat);
+            _context.Add(newContact);
             _context.SaveChangesAsync();
             return 1; 
         }

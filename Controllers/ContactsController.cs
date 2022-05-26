@@ -83,6 +83,8 @@ namespace WebServer.Controllers
         public async Task<IActionResult> GetContacts()
         {
             User loggedUser = await GetLoggedUser(HttpContext);
+            //await _context.Chat.ToListAsync();
+            //User user = await _context.User.Include(x => x.Chats).FirstOrDefaultAsync();
             if (loggedUser.Chats.Count == 0) return Json("[]");
             return Json(await _service.GetAll(loggedUser));
         }
@@ -91,7 +93,7 @@ namespace WebServer.Controllers
         public async Task<IActionResult> GetContact(string id)
         {
             //// find the current user
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
 
             //// find the contacts?
             //await _context.Chat.Include(x => x.Contact).ToListAsync();
@@ -120,26 +122,9 @@ namespace WebServer.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddContact([Bind("Id,Name,Server")] AddContactResponse contact)
+        public async Task<IActionResult> AddContact([Bind("Id,Name,Server")] AddContactResponse contact)
         {
-            User loggedUser = GetLoggedUser(HttpContext);
-            //foreach (Chat chat in loggedUser.Chats)
-            //{
-            //    Chat findChat = await _context.Chat.Include(x => x.Contact).FirstOrDefaultAsync(y => y.Id == chat.Id);
-            //    if (findChat.Contact.Username == contact.Id) return BadRequest();
-            //}
-            //Chat newChat = new();
-            //Contact newContact = new();
-            //newContact.Username = contact.Id;
-            //newContact.Name = contact.Name;
-            //newContact.Server = contact.Server;
-            //newContact.Chat = newChat;
-            //newChat.Messages = new List<Message>();
-            //newChat.Contact = newContact;
-            //loggedUser.Chats.Add(newChat);
-            //_context.Add(newChat);
-            //await _context.SaveChangesAsync();
-            //return Created("", contact);
+            User loggedUser = await GetLoggedUser(HttpContext);
             if (_service.Create(loggedUser, contact) == 0)
             {
                 return BadRequest();
@@ -148,10 +133,10 @@ namespace WebServer.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteContact(string id)
+        public async  Task<IActionResult> DeleteContact(string id)
         {
            
-            User loggedUser = GetLoggedUser(HttpContext);
+            User loggedUser = await GetLoggedUser(HttpContext);
 
             //await _context.Chat.Include(x => x.Contact).ToListAsync();
 
@@ -179,7 +164,7 @@ namespace WebServer.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult EditContact([Bind("Id,Name,Server")] AddContactResponse contact ,string id)
+        public async Task<IActionResult> EditContact([Bind("Id,Name,Server")] AddContactResponse contact ,string id)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
 
