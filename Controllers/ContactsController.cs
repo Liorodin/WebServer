@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebServer.Data;
 using WebServer.Models;
@@ -70,9 +64,7 @@ namespace WebServer.Controllers
         [HttpDelete("{id}")]
         public async  Task<IActionResult> DeleteContact(string id)
         {
-           
             User loggedUser = await GetLoggedUser(HttpContext);
-
             int res = _service.Delete(loggedUser, id);
             if (res == 0)
             {
@@ -85,7 +77,6 @@ namespace WebServer.Controllers
         public async Task<IActionResult> EditContact([Bind("Id,Name,Server")] AddContactResponse contact ,string id)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
             if (_service.Edit(loggedUser, contact, id) == 0) {
                 return NotFound();
             }
@@ -96,7 +87,6 @@ namespace WebServer.Controllers
         public async Task<IActionResult> GetMessages(string id)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
             var messages = await _service.GetMessages(loggedUser, id);
             if (messages == null)
             {
@@ -109,8 +99,6 @@ namespace WebServer.Controllers
         public async Task<IActionResult> GetMessage(string id, int messageId)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
-     
             var msg = await _service.GetMessage(loggedUser, id, messageId);
             if (msg == null)
             {
@@ -123,7 +111,6 @@ namespace WebServer.Controllers
         public async Task<IActionResult> PostMessage([Bind("Content")] TempMessage tempMessage, string id)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
             int result = _service.PostMessage(loggedUser, tempMessage, id);
             if (result == 1)
             {
@@ -136,7 +123,6 @@ namespace WebServer.Controllers
         public async Task<IActionResult> EditMessage([Bind("content")] TempMessage message, string id, int messageId)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
             if (_service.EditMessage(loggedUser, message, id, messageId) == 0)
             {
                 return NotFound();
@@ -148,7 +134,6 @@ namespace WebServer.Controllers
         public async Task<IActionResult> DeleteMessage(string id, int messageId)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
             if (_service.DeleteMessage(loggedUser, id, messageId) == 0)
             {
                 return NotFound();

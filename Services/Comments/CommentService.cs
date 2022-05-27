@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using WebServer.Data;
+﻿using WebServer.Data;
 using WebServer.Models;
 
 namespace WebServer.Services.Comments

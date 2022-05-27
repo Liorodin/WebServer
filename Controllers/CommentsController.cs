@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebServer.Data;
 using WebServer.Models;
-using WebServer.Services;
 using WebServer.Services.Comments;
 
 namespace WebServer.Controllers
@@ -45,7 +37,6 @@ namespace WebServer.Controllers
             var list = _service.serch(query);
             return Json(list);
         }
-
 
         // GET: Comments/Details/5
         public IActionResult Details(int id)
