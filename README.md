@@ -25,7 +25,7 @@ You can also edit, delete or see the details of each one of the comments.
 
 ### `4. Webclient`
 
-By starting our Webclient in addition at the same time, you can see the connection between the two of them: chatting with contacts from different servers and see your messages in the same time you're both online. 
+By starting our Webclient in addition at the same time, you can see the connection between the two of them: chatting with contacts from different servers and see your messages in the same time you're both online.\
 *Notice: if you don't run the server, you can't register and log in to our site.
  
  
