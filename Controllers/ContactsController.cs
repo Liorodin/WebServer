@@ -40,7 +40,8 @@ namespace WebServer.Controllers
         public async Task<IActionResult> GetContacts()
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-            if (loggedUser.Chats.Count == 0) return Json("[]");
+            if (loggedUser == null) return BadRequest();       
+            if (loggedUser.Chats.Count == 0) return Json(loggedUser.Chats);
             return Json(await _service.GetAll(loggedUser));
         }
 
@@ -48,6 +49,7 @@ namespace WebServer.Controllers
         public async Task<IActionResult> GetContact(string id)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
+            if (loggedUser == null) return BadRequest();
             var res = await _service.Get(loggedUser, id);
             if (res == null)
             {
@@ -60,6 +62,7 @@ namespace WebServer.Controllers
         public async Task<IActionResult> AddContact([Bind("Id,Name,Server")] AddContactResponse contact)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
+            if (loggedUser == null) return BadRequest();
             if (_service.Create(loggedUser, contact) == 0)
             {
                 return BadRequest();
@@ -68,11 +71,9 @@ namespace WebServer.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async  Task<IActionResult> DeleteContact(string id)
+        public async Task<IActionResult> DeleteContact(string id)
         {
-           
             User loggedUser = await GetLoggedUser(HttpContext);
-
             int res = _service.Delete(loggedUser, id);
             if (res == 0)
             {
@@ -82,11 +83,12 @@ namespace WebServer.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditContact([Bind("Id,Name,Server")] AddContactResponse contact ,string id)
+        public async Task<IActionResult> EditContact([Bind("Id,Name,Server")] AddContactResponse contact, string id)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
-            if (_service.Edit(loggedUser, contact, id) == 0) {
+            if (loggedUser == null) return BadRequest();
+            if (_service.Edit(loggedUser, contact, id) == 0)
+            {
                 return NotFound();
             }
             return NoContent();
@@ -96,7 +98,7 @@ namespace WebServer.Controllers
         public async Task<IActionResult> GetMessages(string id)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
+            if (loggedUser == null) return BadRequest();
             var messages = await _service.GetMessages(loggedUser, id);
             if (messages == null)
             {
@@ -109,8 +111,7 @@ namespace WebServer.Controllers
         public async Task<IActionResult> GetMessage(string id, int messageId)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
-     
+            if (loggedUser == null) return BadRequest();
             var msg = await _service.GetMessage(loggedUser, id, messageId);
             if (msg == null)
             {
@@ -123,7 +124,7 @@ namespace WebServer.Controllers
         public async Task<IActionResult> PostMessage([Bind("Content")] TempMessage tempMessage, string id)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
+            if (loggedUser == null) return BadRequest();
             int result = _service.PostMessage(loggedUser, tempMessage, id);
             if (result == 1)
             {
@@ -136,7 +137,7 @@ namespace WebServer.Controllers
         public async Task<IActionResult> EditMessage([Bind("content")] TempMessage message, string id, int messageId)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
+            if (loggedUser == null) return BadRequest();
             if (_service.EditMessage(loggedUser, message, id, messageId) == 0)
             {
                 return NotFound();
@@ -148,7 +149,7 @@ namespace WebServer.Controllers
         public async Task<IActionResult> DeleteMessage(string id, int messageId)
         {
             User loggedUser = await GetLoggedUser(HttpContext);
-
+            if (loggedUser == null) return BadRequest();
             if (_service.DeleteMessage(loggedUser, id, messageId) == 0)
             {
                 return NotFound();

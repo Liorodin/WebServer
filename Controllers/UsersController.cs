@@ -73,7 +73,10 @@ namespace WebServer.Controllers
             if (_context.User == null) return NotFound();
 
             if (await _context.User.FindAsync(newUser.Username) != null) return BadRequest();
-
+            if (newUser.Picture == null)
+            {
+                newUser.Picture = "avatar";
+            }
             newUser.Chats = new List<Chat>();
             _context.Add(newUser);
             await _context.SaveChangesAsync();

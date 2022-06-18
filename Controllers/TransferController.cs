@@ -34,7 +34,6 @@ namespace WebServer.Controllers
         [HttpPost]
         public async Task<IActionResult> PostTransfer([Bind("From, To, Content")] TransferRequest request)
         {
-            //User sender = GetUser(HttpContext, request.From);
             User reciever = _context.User.Include(x => x.Chats).FirstOrDefault(y => y.Username == request.To);
             if (reciever == null) return BadRequest();
             Chat findChat = null;
