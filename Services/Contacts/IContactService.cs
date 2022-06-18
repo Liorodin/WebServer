@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using WebServer.Models;
-using WebServer.Controllers;
-using static WebServer.Controllers.ContactsController;
+﻿using WebServer.Models;
 
 namespace WebServer.Services.Contacts
 {
@@ -44,14 +41,12 @@ namespace WebServer.Services.Contacts
         }
         public int Id { get; set; }
         public string Content { get; set; }
-
         public DateTime? Created { get; set; }
         public bool Sent { get; set; }
     }
 
     public interface IContactService
     {
-
         public  Task<List<GetContactResponse>> GetAll(User current);
 
         public  Task<GetContactResponse> Get(User current, string id);
