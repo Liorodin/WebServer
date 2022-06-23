@@ -17,5 +17,7 @@ namespace WebServer.Models
         public string? Picture { get; set; }
 
         public ICollection<Chat>? Chats { get; set; }
+
+        public string? FirebaseToken { get; set; }
     }
 }

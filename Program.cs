@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -32,6 +34,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddSession(option =>
 {
     option.IdleTimeout = TimeSpan.FromMinutes(50);
+});
+ 
+builder.Services.AddSingleton<IDictionary<string, string>>(opt => new Dictionary<string, string>());
+
+FirebaseApp.Create(new AppOptions()
+{
+    //Credential = GoogleCredential.FromAccessToken(google_token),
+    Credential = GoogleCredential.FromFile("Firebase-pk.json"),
 });
 
 builder.Services.AddCors(options =>

@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FirebaseAdmin.Messaging;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebServer.Data;
 using WebServer.Models;
+using Message = WebServer.Models.Message;
 
 namespace WebServer.Controllers
 {
@@ -10,10 +12,12 @@ namespace WebServer.Controllers
     public class TransferController : Controller
     {
         private readonly WebServerContext _context;
+        private IDictionary<string, string> _connections;
 
-        public TransferController(WebServerContext context)
+        public TransferController(WebServerContext context, IDictionary<string, string> connections)
         {
             _context = context;
+            _connections = connections;
         }
 
         public class TransferRequest
@@ -21,6 +25,21 @@ namespace WebServer.Controllers
             public string? From { get; set; }
             public string? To { get; set; }
             public string? Content { get; set; }
+        }
+
+        private void sendFirebaseMessage(String from, String token, String content)
+        {
+            var message = new FirebaseAdmin.Messaging.Message()
+            {
+                Data = new Dictionary<string, string>() { { "myData", "1337" } },
+                Token = token,
+                Notification = new Notification()
+                {
+                    Title = "New message from " + from,
+                    Body = content
+                }
+            };
+            FirebaseMessaging.DefaultInstance.SendAsync(message);
         }
 
         [HttpPost]
@@ -50,6 +69,10 @@ namespace WebServer.Controllers
             _context.Message.Add(message);
             findChat.Messages.Add(message);
             await _context.SaveChangesAsync();
+            if (_connections.ContainsKey(request.To))
+            {
+                sendFirebaseMessage(request.From, _connections[request.To], request.Content);
+            }
             return Created("", request);
         }
     }

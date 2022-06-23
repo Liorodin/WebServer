@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,16 +17,20 @@ namespace WebServer.Controllers
     {
         private readonly WebServerContext _context;
         public IConfiguration _configuration;
-        public UsersController(WebServerContext context, IConfiguration configuration)
+        private IDictionary<string, string> _connections;
+        public UsersController(WebServerContext context, IConfiguration configuration, IDictionary<string, string> connections)
         {
             _context = context;
             _configuration = configuration;
+            _connections = connections;
         }
 
         public class LoginUser
         {
             public string Username { get; set; }
             public string Password { get; set; }
+
+            public string FirebaseToken { get; set; }
         }
 
         private User GetUser(HttpContext context, string username)
@@ -80,10 +85,10 @@ namespace WebServer.Controllers
 
         [AllowAnonymous]
         [HttpPost("Login")]
-        public IActionResult Login([Bind("Username,Password")] LoginUser user)
+        public IActionResult Login([Bind("Username,Password,FirebaseToken")] LoginUser user)
         {
-            if (_context.User == null) return NotFound();
 
+            if (_context.User == null) return NotFound();
             var q = _context.User.Where(e => e.Username == user.Username && e.Password == user.Password);
             if (q.Any())
             {
@@ -94,6 +99,10 @@ namespace WebServer.Controllers
                     new Claim(JwtRegisteredClaimNames.Iat , DateTime.Now.ToString()),
                     new Claim("Username",user.Username)
                 };
+                if (user.FirebaseToken != null)
+                {
+                    _connections[user.Username] = user.FirebaseToken;
+                }
                 var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWTParams:SecretKey"]));
                 var mac = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
                 var token = new JwtSecurityToken(
